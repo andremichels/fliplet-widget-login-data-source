@@ -1,22 +1,88 @@
-<div data-login-id="{{id}}">
-  <div class="login-loader-holder animated">
-    <div class="loader">Loading...</div>
+<div data-login-ds-id="{{id}}">
+  <div class="fl-login-holder" ontouchstart="">
+    <div class="fl-login-header">
+      <h1>Login</h1>
+      <p>Enter your access details below</p>
+    </div>
+
+    <div class="fl-login-form">
+      <form class="form-horizontal">
+        <div class="form-group clearfix ">
+          <div class="col-sm-12 fl-email">
+            <input type="email" class="form-control profile_email" name="Email" placeholder="Enter your email">
+          </div>
+        </div>
+
+        <div class="form-group clearfix">
+          <div class="col-sm-12 fl-password">
+            <input type="password" class="form-control profile_password" name="Password" placeholder="Enter your password">
+          </div>
+        </div>
+
+        <div class="form-btns clearfix">
+          <div class="btn btn-primary btn-login">
+            <span>Log in</span>
+            <div class="loader">Loading...</div>
+          </div>
+          <p class="text-danger hidden">The details you entered don’t match our records. Please try again.</p>
+          {{#if allowReset}}
+          <a class="btn btn-link btn-forget-pass" href="#">
+            Forgot your password?
+          </a>
+          {{/if}}
+        </div>
+      </form>
+    </div>
   </div>
-  <div class="login-form-holder">
-    <h2>{{#if heading}}{{heading}}{{else}}Welcome to the login of this app{{/if}}</h2>
-    <p>Log in using your Fliplet access details.</p>
-    <form class="login-form" data-login-form-id="{{id}}">
-      <div class="form-group">
-        <label>Email address</label>
-        <input type="email" class="form-control login_email" required>
+
+  <div class="fl-restore-pass" ontouchstart="">
+    <div class="state start" data-state="verify-email">
+      <h1>Reset your password</h1>
+      <p>To reset your passwrod we must verify that your email exists in our system</p>
+      <div class="input-wrapper">
+        <input type="email" class="form-control reset-email-field" placeholder="Enter your email" />
       </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" class="form-control login_password" required>
+      <p class="text-danger reset-email-error hidden">We couldn't find your email address. Try again.</p>
+      <div class="btn btn-primary verify-identity">Reset</div>
+      <a class="btn btn-link have-code hidden">I already have a pin code</a>
+      <hr>
+      <div class="btn btn-secondary back-login">Login</div>
+    </div>
+
+    <div class="state future" data-state="verify-code">
+      <h1>Enter verification code</h1>
+      <p>Enter the pin code that was sent to <span class="verify-user-email">hcarneiro@fliplet.com</span>.</p>
+      <div class="input-wrapper">
+        <input type="text" class="form-control pin-code-field" placeholder="Enter pin code" />
+        <span class="fa fa-angle-left back start"></span>
       </div>
-      <div class="login-button-holder">
-        <input type="submit" class="btn btn-primary btn-login" value="Log in"/>
+      <p class="text-danger pin-verify-error hidden">You entered the wrong code or the code expired. Try again or request a new code.</p>
+      <p class="text-danger pin-sent-error hidden">...</p>
+      <div class="btn btn-primary authenticate">
+        <span>Verify</span>
+        <div class="loader">Loading...</div>
       </div>
-    </form>
+      <a class="btn btn-link resend-code hidden">Resend pin code</a>
+      <p class="text-success pin-sent-success hidden">A new code was sent to your email.</p>
+      <hr>
+      <div class="btn btn-secondary back-login">Login</div>
+    </div>
+
+    <div class="state future" data-state="all-done">
+      <h1>Email verified</h1>
+      <p>Press <em>Continue</em> to go to your profile screen where you can set up a new password</p>
+      <div class="btn btn-primary reset-continue">Continue</div>
+    </div>
   </div>
 </div>
+
+<template id="email-template-holder">
+    <div>
+        <p>Your verification code is: <strong>\{{code}}</strong>
+            <br><span style="color:#999;font-size:0.9em;">
+    This verification code will be valid for the next \{{code_duration}} minutes</span></p>
+        <p>You or someone has requested to access the app: <strong>\{{app_name}}</strong>. To continue using the app, please enter your verification code into the app on your mobile device.</p>
+        <p>If you did not perform this request, you can ignore this email.</p>
+        <p>Generated at: \{{time}}</p>
+    </div>
+</template>
