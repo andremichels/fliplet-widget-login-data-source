@@ -1,10 +1,10 @@
 $('[data-login-ds-id]').each(function(){
   var _this = this;
   var $container = $(this);
-  var id = $container.attr('data-login-ds-id');
-  var data = Fliplet.Widget.getData(id);
+  var widgetId = $container.attr('data-login-ds-id');
+  var data = Fliplet.Widget.getData(widgetId);
 
-  this.pvName = 'login_data_source_component_' + this.id;
+  this.pvName = 'login_data_source_component_' + widgetId;
   var dataStructure = {
     auth_token: '',
     id: '',
@@ -25,6 +25,19 @@ $('[data-login-ds-id]').each(function(){
     Fliplet.Security.Storage.init().then(function(){
 
       attachEventListeners();
+      setUserDataPV( function() {
+        //check the validation current state.
+        if (userDataPV.code !== "" && userDataPV.code_generated_at > Date.now() - (CODE_VALID * 60 * 1000)) {
+          $container.find('.have-code').removeClass('hidden');
+          calculateElHeight($container.find('.state[data-state=verify-email]'));
+        }
+        if(userDataPV.verified) {
+          if(typeof data.resetAction !== "undefined") {
+            Fliplet.Navigate.to(data.resetAction);
+          }
+        }
+      }, function() {
+      });
 
       // @TODO: Redirect if Logged in
 
@@ -166,6 +179,7 @@ $('[data-login-ds-id]').each(function(){
         // CHECK FOR EMAIL ON DATA SOURCE
         loginFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, '{"' + DATA_DIRECTORY_EMAIL_COLUMN+'":' + '"' + profileEmail + '"}', DATA_DIRECTORY_PASS_COLUMN, profilePassword, function () {
           // Reset Login button
+          // @TODO: SAVE LOGIN IN PV
           _this.removeClass('loading');
           _this.find('span').removeClass('hidden');
           _this.find('.loader').removeClass('show');
@@ -236,7 +250,7 @@ $('[data-login-ds-id]').each(function(){
 
       window.resetEmail = $container.find('input.reset-email-field').val().toLowerCase(); // Get email for reset
 
-      $container.find('.reset-email-error').removeClass('show');
+      $container.find('.reset-email-error').addClass('hidden');
       // EMAIL FOUND ON DATA SOURCE
       if ($container.find('.state[data-state=verify-email] .form-group').hasClass('has-error')) {
         $container.find('.state[data-state=verify-email] .form-group').removeClass('has-error');
@@ -247,14 +261,14 @@ $('[data-login-ds-id]').each(function(){
         // CHECK FOR EMAIL ON DATA SOURCE
         resetFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, '{"' + DATA_DIRECTORY_EMAIL_COLUMN+'":' + '"' + resetEmail + '"}', DATA_DIRECTORY_PASS_COLUMN, function () {
           // EMAIL FOUND ON DATA SOURCE
-          userDataPV.email = emailAddress;
+          userDataPV.email = resetEmail;
 
           if ($container.find('.state[data-state=verify-email] .form-group').hasClass('has-error')) {
             $container.find('.state[data-state=verify-email] .form-group').removeClass('has-error');
           }
           sendNotification(resetEmail, function () {
             // TRANSITION
-            $container.find('.state.present').removeClass('present').addClass('past');
+            $container.find('.state[data-state=verify-email]').removeClass('present').addClass('past');
 
             $container.find('.verify-user-email').text(resetEmail); // UPDATES TEXT WITH EMAIL
             _this.removeClass("disabled");
@@ -286,7 +300,7 @@ $('[data-login-ds-id]').each(function(){
       } else {
         // INVALID EMAIL
         _this.removeClass("disabled");
-        $container.find('.reset-email-error').html("Please enter a valid email address and try again.");
+        $container.find('.reset-email-error').html("Please enter a valid email address and try again.").removeClass('hidden');
         $container.find('.state[data-state=verify-email] .form-group').addClass('has-error');
         calculateElHeight($container.find('.state[data-state=verify-email]'));
       }
