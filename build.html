@@ -1,0 +1,22 @@
+<div data-login-id="{{id}}">
+  <div class="login-loader-holder animated">
+    <div class="loader">Loading...</div>
+  </div>
+  <div class="login-form-holder">
+    <h2>{{#if heading}}{{heading}}{{else}}Welcome to the login of this app{{/if}}</h2>
+    <p>Log in using your Fliplet access details.</p>
+    <form class="login-form" data-login-form-id="{{id}}">
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" class="form-control login_email" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" class="form-control login_password" required>
+      </div>
+      <div class="login-button-holder">
+        <input type="submit" class="btn btn-primary btn-login" value="Log in"/>
+      </div>
+    </form>
+  </div>
+</div>

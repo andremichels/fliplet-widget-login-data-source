@@ -1,0 +1,38 @@
+{
+  "name": "Fliplet Login",
+  "package": "com.fliplet.data.login",
+  "version": "1.0.0",
+  "icon": "img/icon.png",
+  "tags": ["type:component", "category:security"],
+  "provider_only": false,
+  "html_tag": "div",
+  "providers": [
+    "com.fliplet.link"
+  ],
+  "interface": {
+    "dependencies": [
+      "fliplet-core",
+      "fliplet-studio-ui"
+    ],
+    "assets": [
+      "vendor/jquery.debounce.js",
+      "js/interface.js",
+      "css/interface.css"
+    ]
+  },
+  "build": {
+    "dependencies": [
+      "fliplet-core",
+      "bootstrap-css",
+      "lodash",
+      "fliplet-security"
+    ],
+    "assets": [
+      "js/build.js",
+      "css/build.css"
+    ]
+  },
+  "references": [
+    "action.page:page"
+  ]
+}

@@ -1,0 +1,55 @@
+.fl-widget-provider {
+    border: 0;
+    width: 100%;
+    background-color: transparent;
+}
+#action,
+.form-horizontal {
+    overflow: hidden;
+}
+.form-horizontal {
+    padding: 15px;
+}
+header {
+    display: flex;
+    font-size: 0.8em;
+    border-bottom: 1px solid #E3E9EB;
+    margin-bottom: 3rem;
+    padding-bottom: 1.5em;
+}
+header p {
+    flex: 1;
+    margin: 0 1.4rem 0 0;
+}
+header a {
+    text-decoration: none;
+}
+.form-group {
+    margin-left: -15px;
+    margin-right: -15px;
+}
+.form-control {
+    border-radius: 6px;
+    border: 1px solid #e4e9eb;
+    color: #333;
+    height: 44px;
+    line-height: 44px;
+    padding: 0 15px;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+.form-control:focus {
+    border-color: #00abd2;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(0, 171, 210, .6);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(0, 171, 210, .6);
+}
+label {
+    font-weight: normal;
+    color: #14505e;
+}
+/* WIDTH OF BIGGEST IFRAME */
+@media only screen and (min-width: 488px) {
+    header {
+        font-size: 1.0em;
+    }
+}
