@@ -26,9 +26,7 @@
           </div>
           <p class="text-danger hidden">The details you entered don’t match our records. Please try again.</p>
           {{#if allowReset}}
-          <a class="btn btn-link btn-forget-pass" href="#">
-            Forgot your password?
-          </a>
+          <div class="btn btn-link btn-forget-pass">Forgot your password?</div>
           {{/if}}
         </div>
       </form>
@@ -44,7 +42,7 @@
       </div>
       <p class="text-danger reset-email-error hidden">We couldn't find your email address. Try again.</p>
       <div class="btn btn-primary verify-identity">Reset</div>
-      <a class="btn btn-link have-code hidden">I already have a pin code</a>
+      <div class="btn btn-link have-code hidden">I already have a pin code</div>
       <hr>
       <div class="btn btn-secondary back-login">Login</div>
     </div>
@@ -62,7 +60,7 @@
         <span>Verify</span>
         <div class="loader">Loading...</div>
       </div>
-      <a class="btn btn-link resend-code hidden">Resend pin code</a>
+      <div class="btn btn-link resend-code hidden">Resend pin code</div>
       <p class="text-success pin-sent-success hidden">A new code was sent to your email.</p>
       <hr>
       <div class="btn btn-secondary back-login">Login</div>
