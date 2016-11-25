@@ -96,7 +96,7 @@ $('[data-login-ds-id]').each(function(){
     }).then(function(entries){
       if(entries.length) {
         entries.forEach(function(entry) {
-          if ( entry.data[pass_column] !== '' ) {
+          if ( entry.data[pass_column] !== null ) {
             success_callback();
             return;
           } else {
