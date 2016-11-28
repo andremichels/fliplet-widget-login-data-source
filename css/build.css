@@ -127,7 +127,7 @@ img {
 }
 
 .fl-login-form .form-control {
-	padding: 0 15px 0 64px;
+	padding: 0 15px 0 56px;
 	position: relative;
 }
 
@@ -141,7 +141,7 @@ img {
 	-moz-osx-font-smoothing: grayscale;
 	position: absolute;
 	top: 50%;
-	left: 25px;
+	left: 17px;
 	width: 44px;
 	height: 24px;
 	font-size: 22px;
@@ -163,7 +163,7 @@ img {
 	-moz-osx-font-smoothing: grayscale;
 	position: absolute;
 	top: 50%;
-	left: 25px;
+	left: 17px;
 	width: 44px;
 	height: 24px;
 	font-size: 22px;
