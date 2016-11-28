@@ -13,13 +13,7 @@ img {
 	border: none;
 	text-align: center;
 	cursor: pointer;
-	border-radius: 25px;
-	background-color: #337ab7;
-	border: 2px solid #337ab7;
-}
-
-.btn-primary.disabled:hover {
-	background-color: #337ab7;
+	border-radius: 6px;
 }
 
 .btn-secondary {
@@ -33,21 +27,12 @@ img {
 	border-radius: 6px;
 	text-align: center;
 	cursor: pointer;
-	border-radius: 25px;
-	background-color: transparent;
-	border: 2px solid #337ab7;
-	color: #337ab7;
-}
-
-.btn-secondary.disabled:hover {
-	background-color: transparent;
-	border: 2px solid #337ab7;
-	color: #337ab7;
 }
 
 .btn-primary.disabled,
 .btn-secondary.disabled {
 	pointer-events: none;
+	opacity: 0.6;
 }
 
 .btn-primary:focus,
@@ -56,42 +41,6 @@ img {
 .btn-secondary:hover,
 .btn:active:focus {
 	outline: none;
-}
-
-.btn-primary:active:focus,
-.btn-primary:active:hover {
-	border: 2px solid #286090;
-}
-
-.btn-primary:active,
-.btn-primary:focus,
-.btn-primary:hover {
-	border: 2px solid #286090;
-}
-
-.btn-secondary:active:focus,
-.btn-secondary:active:hover {
-	background-color: #337ab7;
-	color: #FFFFFF;
-}
-
-.btn-secondary:active,
-.btn-secondary:hover {
-	color: #337ab7;
-}
-/* Disabled */
-.btn-secondary.disabled:active:focus,
-.btn-secondary.disabled:active:hover {
-	background-color: transparent;
-	border: 2px solid #337ab7;
-	color: #337ab7;
-}
-
-.btn-secondary.disabled:active,
-.btn-secondary.disabled:hover {
-	background-color: transparent;
-	border: 2px solid #337ab7;
-	color: #337ab7;
 }
 
 .btn-danger {
@@ -134,20 +83,17 @@ img {
 }
 
 .form-control {
-	border-radius: 22px;
-	border: 1px solid transparent;
-	height: 44px;
-	line-height: 44px;
-	padding: 0 15px;
-	-webkit-box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.15);
-	box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.15);
+	border: 1px solid #e5e5e5;
+	border-radius: 6px;
+	webkit-box-shadow: none;
+	box-shadow: none;
 	-webkit-appearance: none;
 }
 
 .form-control:focus {
 	border: 1px solid #337ab7;
-	-webkit-box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.15);
-	box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.15);
+	-webkit-box-shadow: none;
+	box-shadow: none;
 }
 
 .text-helper {
