@@ -15,11 +15,15 @@ $('[data-login-ds-id]').each(function(){
   var CODE_VALID = 30,
       CODE_LENGTH = 6,
       // @TODO: GET APP NAME
-      APP_NAME = data.appName,
+      APP_NAME,
       APP_VALIDATION_DATA_DIRECTORY_ID = data.dataSource,
       DATA_DIRECTORY_EMAIL_COLUMN = data.emailColumn,
       DATA_DIRECTORY_PASS_COLUMN = data.passColumn;
 
+  // Getting app name
+  Fliplet.Apps.get( Fliplet.Env.get('appId') ).then(function (app) {
+  	APP_NAME = app[0].name;
+  });
 
   function initEmailValidation() {
     Fliplet.Security.Storage.init().then(function(){
