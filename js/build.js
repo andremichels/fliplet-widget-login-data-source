@@ -14,7 +14,6 @@ $('[data-login-ds-id]').each(function(){
 
   var CODE_VALID = 30,
       CODE_LENGTH = 6,
-      // @TODO: GET APP NAME
       APP_NAME,
       APP_VALIDATION_DATA_DIRECTORY_ID = data.dataSource,
       DATA_DIRECTORY_EMAIL_COLUMN = data.emailColumn,
@@ -30,20 +29,13 @@ $('[data-login-ds-id]').each(function(){
 
       attachEventListeners();
       setUserDataPV( function() {
-        //check the validation current state.
-        if (userDataPV.code !== "" && userDataPV.code_generated_at > Date.now() - (CODE_VALID * 60 * 1000)) {
-          $container.find('.have-code').removeClass('hidden');
-          calculateElHeight($container.find('.state[data-state=verify-email]'));
-        }
-        if(userDataPV.verified) {
-          if(typeof data.resetAction !== "undefined") {
-            Fliplet.Navigate.to(data.resetAction);
+        if(userDataPV.userLogged) {
+          if(typeof data.loginAction !== "undefined") {
+            Fliplet.Navigate.to(data.loginAction);
           }
         }
       }, function() {
       });
-
-      // @TODO: Redirect if Logged in
 
     });
   }
@@ -184,6 +176,8 @@ $('[data-login-ds-id]').each(function(){
         loginFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, '{"' + DATA_DIRECTORY_EMAIL_COLUMN+'":' + '"' + profileEmail + '"}', DATA_DIRECTORY_PASS_COLUMN, profilePassword, function (entry) {
           // Reset Login button
           userDataPV.entry = entry;
+          userDataPV.userLogged = true;
+          
           _this.removeClass('loading');
           _this.find('span').removeClass('hidden');
           _this.find('.loader').removeClass('show');
@@ -371,7 +365,7 @@ $('[data-login-ds-id]').each(function(){
             $container.find('.state[data-state=verify-code] .form-group').removeClass('has-error');
           }
 
-          userDataPV.verified = true;
+          userDataPV.resetVerified = true;
           userDataPV.code = "";
           userDataPV.code_generated_at = "";
           Fliplet.Security.Storage.update().then(function () {
@@ -434,10 +428,11 @@ $('[data-login-ds-id]').each(function(){
 
   function setUserDataPV(success_callback, fail_callback) {
     var structure = {
-      verified: false,
+      resetVerified: false,
       code: "",
       code_generated_at: "",
-      email: ""
+      email: "",
+      userLogged: false
     };
 
     window.pvName = "user_data_" + Fliplet.Env.get('appId') + "_" + widgetId;
