@@ -75,7 +75,7 @@ $('[data-login-ds-id]').each(function(){
       if(entries.length) {
         entries.forEach(function(entry) {
           if ( entry.data[pass_column] === pass ) {
-            success_callback();
+            success_callback(entry);
             return;
           } else {
             fail_callback(false);
@@ -181,9 +181,9 @@ $('[data-login-ds-id]').each(function(){
 
       if (validateEmail(profileEmail)) {
         // CHECK FOR EMAIL ON DATA SOURCE
-        loginFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, '{"' + DATA_DIRECTORY_EMAIL_COLUMN+'":' + '"' + profileEmail + '"}', DATA_DIRECTORY_PASS_COLUMN, profilePassword, function () {
+        loginFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, '{"' + DATA_DIRECTORY_EMAIL_COLUMN+'":' + '"' + profileEmail + '"}', DATA_DIRECTORY_PASS_COLUMN, profilePassword, function (entry) {
           // Reset Login button
-          // @TODO: SAVE LOGIN IN PV
+          userDataPV.entry = entry;
           _this.removeClass('loading');
           _this.find('span').removeClass('hidden');
           _this.find('.loader').removeClass('show');
@@ -382,6 +382,9 @@ $('[data-login-ds-id]').each(function(){
             $container.find('.state.present').removeClass('present').addClass('past');
             calculateElHeight($container.find('.state[data-state=all-done]'));
             $container.find('.state[data-state=all-done]').removeClass('future').addClass('present');
+
+            // Analytics - Info Event
+            Fliplet.Analytics.info({ email: userDataPV.email, action: 'search'});
           });
         }
       } else {
