@@ -1,3 +1,14 @@
+String.prototype.hashCode = function(){
+  var hash = 0;
+  if (this.length == 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    char = this.charCodeAt(i);
+    hash = ((hash<<5)-hash)+char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+};
+
 $('[data-login-ds-id]').each(function(){
   var _this = this;
   var $container = $(this);
@@ -163,8 +174,9 @@ $('[data-login-ds-id]').each(function(){
 
       window.profileEmail = $container.find('input.profile_email').val().toLowerCase(); // GET EMAIL VALUE
 
-      // @TODO: SALT password entered by user and save it in the var below for comparisson with the SALTED password already stored in DS
-      window.profilePassword = $container.find('input.profile_password').val();
+      // @TODO: Add SALT and change HASHING method
+      var hashedPass = $container.find('input.profile_password').val().hashCode();
+      window.profilePassword = hashedPass;
 
       // Triggers loading
       $(this).addClass('loading');
@@ -177,7 +189,7 @@ $('[data-login-ds-id]').each(function(){
           // Reset Login button
           userDataPV.entry = entry;
           userDataPV.userLogged = true;
-          
+
           _this.removeClass('loading');
           _this.find('span').removeClass('hidden');
           _this.find('.loader').removeClass('show');
