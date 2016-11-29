@@ -72,7 +72,7 @@ $('[data-login-ds-id]').each(function(){
     }).then(function(entries){
       if(entries.length) {
         entries.forEach(function(entry) {
-          if ( entry.data[pass_column] === pass ) {
+          if ( entry.data[pass_column] == pass ) {
             success_callback(entry);
             return;
           } else {
