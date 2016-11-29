@@ -184,14 +184,17 @@ $('[data-login-ds-id]').each(function(){
           // Reset Login button
           userDataPV.entry = entry;
           userDataPV.userLogged = true;
+          Fliplet.Security.Storage.update().then(function () {
 
-          _this.removeClass('loading');
-          _this.find('span').removeClass('hidden');
-          _this.find('.loader').removeClass('show');
+            _this.removeClass('loading');
+            _this.find('span').removeClass('hidden');
+            _this.find('.loader').removeClass('show');
 
-          if(typeof data.loginAction !== "undefined") {
-            Fliplet.Navigate.to(data.loginAction);
-          }
+            if(typeof data.loginAction !== "undefined") {
+              Fliplet.Navigate.to(data.loginAction);
+            }
+            
+          });
         }, function ( error ) {
           if ( error ) {
             // EMAIL NOT FOUND ON DATA SOURCE
