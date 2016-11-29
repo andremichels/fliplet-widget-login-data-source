@@ -35,7 +35,7 @@ $('[data-login-ds-id]').each(function(){
 
       attachEventListeners();
       setUserDataPV( function() {
-        if(userDataPV.userLogged) {
+        if(userDataPV.userLogged && !Fliplet.Env.get('interact')) {
           if(typeof data.loginAction !== "undefined") {
             Fliplet.Navigate.to(data.loginAction);
           }
@@ -193,7 +193,7 @@ $('[data-login-ds-id]').each(function(){
             if(typeof data.loginAction !== "undefined") {
               Fliplet.Navigate.to(data.loginAction);
             }
-            
+
           });
         }, function ( error ) {
           if ( error ) {
