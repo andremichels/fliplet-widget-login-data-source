@@ -189,8 +189,15 @@ $('[data-login-ds-id]').each(function(){
           _this.find('.loader').removeClass('show');
 
           if(typeof data.loginAction !== "undefined") {
+            Fliplet.Navigate.addHook('beforeRedirect', function () {
+              return Fliplet.Analytics.info({ email: profileEmail });
+            });
             Fliplet.Navigate.to(data.loginAction);
+          } else {
+            Fliplet.Analytics.info({ email: profileEmail });
           }
+
+
         }, function ( error ) {
           if ( error ) {
             // EMAIL NOT FOUND ON DATA SOURCE
@@ -382,9 +389,6 @@ $('[data-login-ds-id]').each(function(){
             $container.find('.state.present').removeClass('present').addClass('past');
             calculateElHeight($container.find('.state[data-state=all-done]'));
             $container.find('.state[data-state=all-done]').removeClass('future').addClass('present');
-
-            // Analytics - Info Event
-            Fliplet.Analytics.info({ email: userDataPV.email, action: 'search'});
           });
         }
       } else {
