@@ -445,7 +445,7 @@ $('[data-login-ds-id]').each(function(){
       userLogged: false
     };
 
-    window.pvName = "user_data_" + Fliplet.Env.get('appId') + "_" + widgetId;
+    window.pvName = "login-data-source";
     Fliplet.Security.Storage.create(pvName, structure).then(function(data){
       window.userDataPV = data;
       success_callback();
