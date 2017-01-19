@@ -100,7 +100,7 @@ $('[data-login-ds-id]').each(function(){
       if(entries.length) {
         entries.forEach(function(entry) {
           if ( entry.data[pass_column] !== null ) {
-            success_callback();
+            success_callback(entry);
             return;
           } else {
             fail_callback(false);
@@ -268,24 +268,29 @@ $('[data-login-ds-id]').each(function(){
       // VALIDATE EMAIL
       if (validateEmail(resetEmail)) {
         // CHECK FOR EMAIL ON DATA SOURCE
-        resetFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, '{"' + DATA_DIRECTORY_EMAIL_COLUMN+'":' + '"' + resetEmail + '"}', DATA_DIRECTORY_PASS_COLUMN, function () {
+        resetFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, '{"' + DATA_DIRECTORY_EMAIL_COLUMN+'":' + '"' + resetEmail + '"}', DATA_DIRECTORY_PASS_COLUMN, function (entry) {
           // EMAIL FOUND ON DATA SOURCE
           userDataPV.email = resetEmail;
+          userDataPV.entry = entry;
+          userDataPV.userReset = true;
+          Fliplet.Security.Storage.update().then(function () {
 
-          if ($container.find('.state[data-state=verify-email] .form-group').hasClass('has-error')) {
-            $container.find('.state[data-state=verify-email] .form-group').removeClass('has-error');
-          }
-          sendNotification(resetEmail, function () {
-            // TRANSITION
-            $container.find('.state[data-state=verify-email]').removeClass('present').addClass('past');
+            if ($container.find('.state[data-state=verify-email] .form-group').hasClass('has-error')) {
+              $container.find('.state[data-state=verify-email] .form-group').removeClass('has-error');
+            }
+            sendNotification(resetEmail, function () {
+              // TRANSITION
+              $container.find('.state[data-state=verify-email]').removeClass('present').addClass('past');
 
-            $container.find('.verify-user-email').text(resetEmail); // UPDATES TEXT WITH EMAIL
-            _this.removeClass("disabled");
+              $container.find('.verify-user-email').text(resetEmail); // UPDATES TEXT WITH EMAIL
+              _this.removeClass("disabled");
 
-            calculateElHeight($container.find('.state[data-state=verify-code]'));
-            $container.find('.state[data-state=verify-code]').removeClass('future').addClass('present');
-          }, function () {
-            $container.find('.reset-email-error').text(CONTACT_UNREACHABLE).removeClass('hidden');
+              calculateElHeight($container.find('.state[data-state=verify-code]'));
+              $container.find('.state[data-state=verify-code]').removeClass('future').addClass('present');
+            }, function () {
+              $container.find('.reset-email-error').text(CONTACT_UNREACHABLE).removeClass('hidden');
+            });
+
           });
 
         }, function ( error ) {
