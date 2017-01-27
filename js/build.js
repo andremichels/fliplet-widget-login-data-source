@@ -185,6 +185,8 @@ $('[data-login-ds-id]').each(function(){
           // Reset Login button
           userDataPV.entry = entry;
           userDataPV.userLogged = true;
+          // Set PV to be used by Chat
+          Fliplet.App.Storage.set('fl-chat-auth-email', profileEmail);
           Fliplet.Security.Storage.update().then(function () {
 
             _this.removeClass('loading');
