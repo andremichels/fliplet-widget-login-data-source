@@ -16,7 +16,7 @@ $('[data-login-ds-id]').each(function(){
   var widgetUuid = $container.attr('data-login-ds-uuid');
   var data = Fliplet.Widget.getData(widgetId);
 
-  this.pvName = 'login_data_source_component_' + widgetUuid;
+  this.pvName = 'login_data_source_component_' + Fliplet.Env.get('appId');
   var dataStructure = {
     auth_token: '',
     id: '',
