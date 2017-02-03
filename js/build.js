@@ -66,7 +66,7 @@ $('[data-login-ds-id]').each(function(){
   function loginFromDataSource(data_source_id, email_object, pass_column, pass, success_callback, fail_callback) {
     //read_data_sources -> OK.
 
-    Fliplet.DataSources.connect(data_source_id).then(function(dataSource){
+    Fliplet.DataSources.connect(data_source_id, { offline: false }).then(function(dataSource){
       return dataSource.find({
         where: email_object
       });
@@ -92,7 +92,7 @@ $('[data-login-ds-id]').each(function(){
   function resetFromDataSource(data_source_id, email_object, pass_column, success_callback, fail_callback) {
     //read_data_sources -> OK.
 
-    Fliplet.DataSources.connect(data_source_id).then(function(dataSource){
+    Fliplet.DataSources.connect(data_source_id, { offline: false }).then(function(dataSource){
       return dataSource.find({
         where: email_object
       });
