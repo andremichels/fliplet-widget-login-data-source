@@ -63,12 +63,14 @@ tinymce.init({
   inline: false,
   resize: true,
   min_height: 300,
-  oninit : function(){
-    if ( "emailTemplate" in data ) {
-      tinymce.get('validationEmail').setContent(data.emailTemplate);
-    } else {
-      tinymce.get('validationEmail').setContent(emailTemplate);
-    }
+  setup : function(editor) {
+    editor.on('init', function() {
+      if ("emailTemplate" in data && data.emailTemplate !== "") {
+        tinymce.get('validationEmail').setContent(data.emailTemplate);
+      } else {
+        tinymce.get('validationEmail').setContent(emailTemplate);
+      }
+    });
   }
 });
 
@@ -106,7 +108,7 @@ function save(notifyComplete) {
     data[fieldId] = $('#' + fieldId).val();
   });
 
-  data.emailTemplate = tinymce.get('validationEmail').getContent();
+  data.emailTemplate = tinymce.get('validationEmail').getContent() || emailTemplate;
 
   Fliplet.Widget.save(data).then(function () {
     if (notifyComplete) {
