@@ -41,6 +41,7 @@
   },
   "references": [
     "loginAction.page:page",
-    "resetAction.page:page"
+    "resetAction.page:page",
+    "dataSourceId:dataSource"
   ]
 }
