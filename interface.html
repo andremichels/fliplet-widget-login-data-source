@@ -5,85 +5,176 @@
         <a href="#">Need help?</a>
     </header>
 
-    <form class="form-horizontal">
-        <p>To configure the login component you will need to choose the <b>Email</b> and <b>Password</b> fields of your data source.</p>
-        <div class="form-group">
-            <div class="col-sm-4 control-label">
-                <label for="dataSource">Select a data source</label>
-            </div>
-            <div class="col-sm-8">
-                <label for="dataSource" class="select-proxy-display">
-                    <span class="icon fa fa-chevron-down"></span>
-                    <span class="select-value-proxy">-- Select a data source --</span>
-                    <select name="select_datasource" id="dataSource" data-label="select" class="hidden-select form-control">
-                        <option selected value="none">-- Select a data source --</option>
-                    </select>
-                </label>
-            </div>
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active" id="settings-control"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">Settings</a></li>
+        <li role="presentation" class="" id="email-template-control"><a href="#email-template" aria-controls="email-template" role="tab" data-toggle="tab">Email template</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane tab-pane-content active" id="settings">
+
+          <form class="form-horizontal">
+              <p>To configure the login component you will need to choose the <b>Email</b> and <b>Password</b> fields of your data source.</p>
+              <div class="form-group">
+                  <div class="col-sm-4 control-label">
+                      <label for="dataSource">Select a data source</label>
+                  </div>
+                  <div class="col-sm-8">
+                      <label for="dataSource" class="select-proxy-display">
+                          <span class="icon fa fa-chevron-down"></span>
+                          <span class="select-value-proxy">-- Select a data source --</span>
+                          <select name="select_datasource" id="dataSource" data-label="select" class="hidden-select form-control">
+                              <option selected value="none">-- Select a data source --</option>
+                          </select>
+                      </label>
+                  </div>
+              </div>
+              <div class="form-group hidden" id="select-email-field">
+                  <div class="col-sm-4 control-label">
+                      <label for="emailColumn">Select the email field</label>
+                  </div>
+                  <div class="col-sm-8">
+                      <label for="emailColumn" class="select-proxy-display">
+                          <span class="icon fa fa-chevron-down"></span>
+                          <span class="select-value-proxy">-- Select email field --</span>
+                          <select name="select_email" id="emailColumn" data-label="select" class="hidden-select form-control">
+                              <option selected value="none">-- Select email field --</option>
+                          </select>
+                      </label>
+                      <span class="text-helper">Users will use the email on this field to log in.</span>
+                  </div>
+              </div>
+              <div class="form-group hidden" id="select-pass-field">
+                  <div class="col-sm-4 control-label">
+                      <label for="passColumn">Select the password field</label>
+                  </div>
+                  <div class="col-sm-8">
+                      <label for="passColumn" class="select-proxy-display">
+                          <span class="icon fa fa-chevron-down"></span>
+                          <span class="select-value-proxy">-- Select password field --</span>
+                          <select name="select_pass" id="passColumn" data-label="select" class="hidden-select form-control">
+                              <option selected value="none">-- Select password field --</option>
+                          </select>
+                      </label>
+                      <span class="text-helper">Users will use the password on this field to log in.</span>
+                  </div>
+              </div>
+
+              <h2><small>Redirect after logging in</small></h2>
+              <p>Select to what screen the user will be redirected after logging in.</p>
+
+              <!-- Link action provider -->
+              <div id="login-link-action"></div>
+
+              <div class="allow-reset-password">
+                  <div class="form-group">
+                      <label class="col-sm-4 control-label">Do you want to allow users to reset their password?</label>
+                      <div class="col-sm-8">
+                          <div class="checkbox">
+                              <input type="checkbox" id="allow_reset" name="allow_reset" {{#if allowReset}}checked{{/if}}>
+                              <label for="allow_reset">
+                                  <span class="check"><i class="fa fa-check"></i></span> Yes, please
+                              </label>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <div class="reset-pass-redirect hidden">
+                  <h2><small>Redirect to reset password</small></h2>
+                  <p>Select to what screen the user will be able to reset their password.</p>
+
+                  <!-- Link action provider -->
+                  <div id="reset-link-action"></div>
+              </div>
+
+          </form>
         </div>
-        <div class="form-group hidden" id="select-email-field">
-            <div class="col-sm-4 control-label">
-                <label for="emailColumn">Select the email field</label>
-            </div>
-            <div class="col-sm-8">
-                <label for="emailColumn" class="select-proxy-display">
-                    <span class="icon fa fa-chevron-down"></span>
-                    <span class="select-value-proxy">-- Select email field --</span>
-                    <select name="select_email" id="emailColumn" data-label="select" class="hidden-select form-control">
-                        <option selected value="none">-- Select email field --</option>
-                    </select>
-                </label>
-                <span class="text-helper">Users will use the email on this field to log in.</span>
-            </div>
+        <div role="tabpanel" class="tab-pane tab-pane-content" id="email-template">
+          <h2><small>Configure your verification email template</small></h2>
+
+          <div class="form-group clearfix">
+              <div class="col-sm-12 control-label">
+                  <label>Template of the email sent to the user with a verification code</label>
+              </div>
+              <div class="col-sm-12">
+                  <textarea data-tinymce id="validationEmail" class="form-control"></textarea>
+              </div>
+              <div class="col-sm-12">
+                  <h2><small>How to use</small></h2>
+                  <p>Use the following to:</p>
+                  <ul>
+                      <li><code>\{{verification_code}}</code> - insert the verification code <strong>(Required)</strong></li>
+                      <li><code>\{{app_name}}</code> - insert your app name</li>
+                      <li><code>\{{organisation_name}}</code> - insert your organisation name</li>
+                      <li><code>\{{code_duration}}</code> - insert the experition time of the verification code (in hours)</li>
+                      <li><code>\{{time}}</code> - insert the time when the code was generated</li>
+                  </ul>
+              </div>
+          </div>
         </div>
-        <div class="form-group hidden" id="select-pass-field">
-            <div class="col-sm-4 control-label">
-                <label for="passColumn">Select the password field</label>
-            </div>
-            <div class="col-sm-8">
-                <label for="passColumn" class="select-proxy-display">
-                    <span class="icon fa fa-chevron-down"></span>
-                    <span class="select-value-proxy">-- Select password field --</span>
-                    <select name="select_pass" id="passColumn" data-label="select" class="hidden-select form-control">
-                        <option selected value="none">-- Select password field --</option>
-                    </select>
-                </label>
-                <span class="text-helper">Users will use the password on this field to log in.</span>
-            </div>
-        </div>
-
-        <h2><small>Redirect after logging in</small></h2>
-        <p>Select to what screen the user will be redirected after logging in.</p>
-
-        <!-- Link action provider -->
-        <div id="login-link-action"></div>
-
-        <div class="allow-reset-password">
-            <div class="form-group">
-                <label class="col-sm-4 control-label">Do you want to allow users to reset their password?</label>
-                <div class="col-sm-8">
-                    <div class="checkbox">
-                        <input type="checkbox" id="allow_reset" name="allow_reset" {{#if allowReset}}checked{{/if}}>
-                        <label for="allow_reset">
-                            <span class="check"><i class="fa fa-check"></i></span> Yes, please
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="reset-pass-redirect hidden">
-            <h2><small>Redirect to reset password</small></h2>
-            <p>Select to what screen the user will be able to reset their password.</p>
-
-            <!-- Link action provider -->
-            <div id="reset-link-action"></div>
-        </div>
-
-    </form>
+      </div>
 
 </div>
 
 <template id="template-data-source-entry">
     <option value="\{{id}}">\{{name}}</option>
+</template>
+
+<template id="template-email-validation">
+<style>body{background-color:#eee}</style>
+<table border="0" margin="0" cellpadding="15" cellspacing="0" style="border:0;font-family:helvetica,arial,sans-serif;width:100%;background-color:#eee">
+<tbody>
+<tr>
+<td style="text-align:center">
+<!--[if mso]>
+<center>
+<table><tr><td width="600">
+<![endif]-->
+<table align="center" border="0" margin="0" cellpadding="0" cellspacing="0" style="border:0;max-width:600px;text-align:left;background-color:#fff">
+<tbody>
+<tr>
+<td>
+<table border="0" margin="0" cellpadding="0" cellspacing="0" style="border:0">
+<tbody>
+<tr>
+<td style="width:15px;height:15px"></td>
+<td style="width:15px;height:15px"></td>
+<td style="width:15px;height:15px"></td>
+</tr>
+<tr>
+<td style="width:15px;height:15px"></td>
+<td>
+<h1 style="text-align:center;font-weight:normal;line-height:1.4;color:#666;font-size:24px">Verification code for<br><strong style="color:#333">\{{app_name}}</strong></h1>
+<h2 style="text-align:center;font-weight:normal;line-height:1.4;color:#666;font-size:24px">Your code is<br><strong style="color:#333">\{{verification_code}}</strong></h2>
+<p style="text-align:center;font-size:12px;color:#999">This code is only valid for 24 hours</p>
+<hr style="border-left:none;border-right:0;border-bottom:0;border-top:1px solid #ccc" />
+<p style="color:#333;line-height:1.6;font-size:14px">This email is sent to you from \{{organisation_name}}.</p>
+<p style="color:#333;line-height:1.6;font-size:14px"><strong>What is this code for?</strong> To verify you can access the registered email address and protect your account. Please enter the above code into your app.</p>
+<p style="color:#333;line-height:1.6;font-size:14px"><strong> Didn't request this code?</strong> Please ignore it. If you think someone is trying to use your details without permission or are concerned by this email please contact your app administrator.</p>
+<p style="color:#333;line-height:1.6;font-size:14px"><strong> Do you have further questions?</strong> please contact your app administrator.
+<hr style="border-left:none;border-right:0;border-bottom:0;border-top:1px solid #ccc" />
+<p style="color:#999;line-height:1.6;font-size:12px">This email is sent by <a href="https://fliplet.com">Fliplet</a>, an enterprise app platform used by <strong>\{{organisation_name}}</strong> to manage their mobile and web apps. To find out more about Fliplet and our terms and conditions please visit <a href="https://fliplet.com">fliplet.com</a>.</p>
+</td>
+<td style="width:15px;height:15px"></td>
+</tr>
+<tr>
+<td style="width:15px;height:15px"></td>
+<td style="width:15px;height:15px"></td>
+<td style="width:15px;height:15px"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+<!--[if mso]>
+</td></tr></table>
+</center>
+<![endif]-->
+</td>
+</tr>
+</tbody>
+</table>
 </template>

@@ -9,6 +9,8 @@ var templates = {
   dataSourceEntry: template('data-source-entry')
 };
 
+var emailTemplate = $('#template-email-validation').html();
+
 var fields = [
   'dataSource',
   'emailColumn',
@@ -45,6 +47,22 @@ var resetActionProvider = Fliplet.Widget.open('com.fliplet.link', {
   }
 });
 
+// TinyMCE INIT
+tinymce.init({
+  selector: '#validationEmail',
+  theme: 'modern',
+  plugins: [
+    'advlist lists link image charmap hr',
+    'searchreplace insertdatetime table textcolor colorpicker code'
+  ],
+  toolbar: 'formatselect | fontselect fontsizeselect | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | link | bullist numlist outdent indent | blockquote subscript superscript | table charmap hr | removeformat | code',
+  menubar: false,
+  statusbar: true,
+  inline: false,
+  resize: true,
+  min_height: 300
+});
+
 // 1. Fired from Fliplet Studio when the external save button is clicked
 Fliplet.Widget.onSaveRequest(function () {
   $('form').submit();
@@ -78,6 +96,8 @@ function save(notifyComplete) {
   fields.forEach(function (fieldId) {
     data[fieldId] = $('#' + fieldId).val();
   });
+
+  data.emailTemplate = tinymce.get('validationEmail').getContent();
 
   Fliplet.Widget.save(data).then(function () {
     if (notifyComplete) {
@@ -161,6 +181,12 @@ $('#help_tip').on('click', function() {
 });
 
 function initialiseData() {
+  if ( "emailTemplate" in data ) {
+    tinymce.get('validationEmail').setContent(data.emailTemplate);
+  } else {
+    tinymce.get('validationEmail').setContent(emailTemplate);
+  }
+
   fields.forEach(function (fieldId) {
     if(data[fieldId]) {
       $('#' + fieldId).val(data[fieldId]).change();
