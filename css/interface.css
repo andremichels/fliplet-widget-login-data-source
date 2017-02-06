@@ -244,6 +244,32 @@ label {
 .allow-reset-password {
     margin-top: 30px;
 }
+/* TABS */
+.nav-tabs > li.disabled {
+    pointer-events: none;
+}
+
+.nav-tabs > li.disabled > a {
+    color: #999 !important;
+}
+
+.nav > li > a,
+.nav > li > a:focus,
+.nav > li > a:hover {
+    color: #333 !important;
+    border: 0;
+    border-bottom: 4px solid transparent;
+    background: none;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:focus,
+.nav-tabs > li.active > a:hover {
+    color: #333;
+    border: 0;
+    border-bottom: 4px solid #00abd2;
+    background: none;
+}
 /* @MEDIA QUERY */
 @media screen and (min-width: 640px) {
     .container-fluid {
