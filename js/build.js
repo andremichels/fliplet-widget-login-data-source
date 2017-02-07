@@ -33,18 +33,18 @@ $('[data-login-ds-id]').each(function(){
     ORG_NAME = Fliplet.Env.get('organizationName');
 
   function initEmailValidation() {
-    Fliplet.Security.Storage.init().then(function(){
+    Fliplet.Navigator.onReady().then(function(){
 
-      attachEventListeners();
-      setUserDataPV( function() {
-        if(userDataPV.userLogged && !Fliplet.Env.get('interact')) {
-          if(typeof data.loginAction !== "undefined") {
-            Fliplet.Navigate.to(data.loginAction);
+      Fliplet.Security.Storage.init().then(function(){
+        attachEventListeners();
+        setUserDataPV( function() {
+          if(userDataPV.userLogged && !Fliplet.Env.get('interact')) {
+            if(typeof data.loginAction !== "undefined") {
+              Fliplet.Navigate.to(data.loginAction);
+            }
           }
-        }
-      }, function() {
+        }, function() {});
       });
-
     });
   }
 
