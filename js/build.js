@@ -29,7 +29,7 @@ $('[data-login-ds-id]').each(function(){
       APP_NAME = Fliplet.Env.get('appName'),
       APP_VALIDATION_DATA_DIRECTORY_ID = data.dataSource,
       DATA_DIRECTORY_EMAIL_COLUMN = data.emailColumn,
-      DATA_DIRECTORY_PASS_COLUMN = data.passColumn
+      DATA_DIRECTORY_PASS_COLUMN = data.passColumn,
       OVERRIDE_CODE = '999999';
 
   function initEmailValidation() {
