@@ -39,7 +39,7 @@ $('[data-login-ds-id]').each(function(){
       Fliplet.Security.Storage.init().then(function(){
         attachEventListeners();
         setUserDataPV( function() {
-          if(userDataPV.userLogged && !Fliplet.Env.get('interact')) {
+          if((userDataPV.userLogged || userDataPV.userReset) && !Fliplet.Env.get('interact')) {
             if(typeof data.loginAction !== "undefined") {
               Fliplet.Navigate.to(data.loginAction);
             }
