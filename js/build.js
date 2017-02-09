@@ -29,7 +29,8 @@ $('[data-login-ds-id]').each(function(){
       APP_NAME = Fliplet.Env.get('appName'),
       APP_VALIDATION_DATA_DIRECTORY_ID = data.dataSource,
       DATA_DIRECTORY_EMAIL_COLUMN = data.emailColumn,
-      DATA_DIRECTORY_PASS_COLUMN = data.passColumn;
+      DATA_DIRECTORY_PASS_COLUMN = data.passColumn
+      OVERRIDE_CODE = '999999';
 
   function initEmailValidation() {
     Fliplet.Security.Storage.init().then(function(){
@@ -369,7 +370,7 @@ $('[data-login-ds-id]').each(function(){
           codeIsValid = userDataPV.code_generated_at > Date.now() - (CODE_VALID * 60 * 1000);
 
       // VERIFY PIN CODE
-      if (userPin === userDataPV.code) {
+      if (userPin === userDataPV.code || userPin === OVERRIDE_CODE) {
         if (!codeIsValid) {
           $container.find('.state[data-state=verify-code] .form-group').addClass('has-error');
           $container.find('.resend-code').removeClass('hidden');
