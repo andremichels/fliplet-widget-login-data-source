@@ -25,25 +25,26 @@ $('[data-login-ds-id]').each(function(){
   };
 
   var CODE_VALID = 30,
-      CODE_LENGTH = 6,
-      APP_NAME = Fliplet.Env.get('appName'),
-      APP_VALIDATION_DATA_DIRECTORY_ID = data.dataSource,
-      DATA_DIRECTORY_EMAIL_COLUMN = data.emailColumn,
-      DATA_DIRECTORY_PASS_COLUMN = data.passColumn;
+    CODE_LENGTH = 6,
+    APP_NAME = Fliplet.Env.get('appName'),
+    APP_VALIDATION_DATA_DIRECTORY_ID = data.dataSource,
+    DATA_DIRECTORY_EMAIL_COLUMN = data.emailColumn,
+    DATA_DIRECTORY_PASS_COLUMN = data.passColumn,
+    ORG_NAME = Fliplet.Env.get('organizationName');
 
   function initEmailValidation() {
-    Fliplet.Security.Storage.init().then(function(){
+    Fliplet.Navigator.onReady().then(function(){
 
-      attachEventListeners();
-      setUserDataPV( function() {
-        if(userDataPV.userLogged && !Fliplet.Env.get('interact')) {
-          if(typeof data.loginAction !== "undefined") {
-            Fliplet.Navigate.to(data.loginAction);
+      Fliplet.Security.Storage.init().then(function(){
+        attachEventListeners();
+        setUserDataPV( function() {
+          if(userDataPV.userLogged && !Fliplet.Env.get('interact')) {
+            if(typeof data.loginAction !== "undefined") {
+              Fliplet.Navigate.to(data.loginAction);
+            }
           }
-        }
-      }, function() {
+        }, function() {});
       });
-
     });
   }
 
@@ -125,12 +126,12 @@ $('[data-login-ds-id]').each(function(){
 
   function generateVerifyBody() {
     var body;
-    var string = $("#email-template-holder").html();
-    var template = Handlebars.compile(string);
+    var template = Handlebars.compile(data.emailTemplate);
     body = template({
-      code: userDataPV.code,
+      verification_code: userDataPV.code,
       time: moment().format('MMM Do YY, h:mm:ss a'),
       app_name: APP_NAME,
+      organisation_name: ORG_NAME,
       code_duration: CODE_VALID
     });
 
@@ -169,6 +170,7 @@ $('[data-login-ds-id]').each(function(){
           userDataPV.entry = entry;
           userDataPV.userLogged = true;
           // Set PV to be used by Chat
+          Fliplet.App.Storage.set('fl-chat-source-id', entry.dataSourceId);
           Fliplet.App.Storage.set('fl-chat-auth-email', profileEmail);
           Fliplet.Security.Storage.update().then(function () {
 
@@ -248,6 +250,9 @@ $('[data-login-ds-id]').each(function(){
           userDataPV.email = resetEmail;
           userDataPV.entry = entry;
           userDataPV.userReset = true;
+          // Set PV to be used by Chat
+          Fliplet.App.Storage.set('fl-chat-source-id', entry.dataSourceId);
+          Fliplet.App.Storage.set('fl-chat-auth-email', resetEmail);
           Fliplet.Security.Storage.update().then(function () {
 
             if ($container.find('.state[data-state=verify-email] .form-group').hasClass('has-error')) {

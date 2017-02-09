@@ -5,6 +5,8 @@ var organizationId = Fliplet.Env.get('organizationId');
 var validInputEventName = 'interface-validate';
 
 var allDataSources;
+var initialLoadingDone = false;
+
 var templates = {
   dataSourceEntry: template('data-source-entry')
 };
@@ -60,7 +62,16 @@ tinymce.init({
   statusbar: true,
   inline: false,
   resize: true,
-  min_height: 300
+  min_height: 300,
+  setup : function(editor) {
+    editor.on('init', function() {
+      if ("emailTemplate" in data && data.emailTemplate !== "") {
+        tinymce.get('validationEmail').setContent(data.emailTemplate);
+      } else {
+        tinymce.get('validationEmail').setContent(emailTemplate);
+      }
+    });
+  }
 });
 
 // 1. Fired from Fliplet Studio when the external save button is clicked
@@ -97,7 +108,7 @@ function save(notifyComplete) {
     data[fieldId] = $('#' + fieldId).val();
   });
 
-  data.emailTemplate = tinymce.get('validationEmail').getContent();
+  data.emailTemplate = tinymce.get('validationEmail').getContent() || emailTemplate;
 
   Fliplet.Widget.save(data).then(function () {
     if (notifyComplete) {
@@ -172,8 +183,11 @@ $('#allow_reset').on('change', $.debounce(function() {
     data.allowReset = false;
   }
 
-  save();
+  if(initialLoadingDone) {
+    save();
+  }
 
+  initialLoadingDone = true;
 }, 0));
 
 $('#help_tip').on('click', function() {
@@ -181,11 +195,6 @@ $('#help_tip').on('click', function() {
 });
 
 function initialiseData() {
-  if ( "emailTemplate" in data ) {
-    tinymce.get('validationEmail').setContent(data.emailTemplate);
-  } else {
-    tinymce.get('validationEmail').setContent(emailTemplate);
-  }
 
   fields.forEach(function (fieldId) {
     if(data[fieldId]) {
