@@ -187,6 +187,7 @@ $('[data-login-ds-id]').each(function(){
           userDataPV.entry = entry;
           userDataPV.userLogged = true;
           // Set PV to be used by Chat
+          Fliplet.App.Storage.set('fl-chat-source-id', entry.dataSourceId);
           Fliplet.App.Storage.set('fl-chat-auth-email', profileEmail);
           Fliplet.Security.Storage.update().then(function () {
 
@@ -277,6 +278,7 @@ $('[data-login-ds-id]').each(function(){
           userDataPV.entry = entry;
           userDataPV.userReset = true;
           // Set PV to be used by Chat
+          Fliplet.App.Storage.set('fl-chat-source-id', entry.dataSourceId);
           Fliplet.App.Storage.set('fl-chat-auth-email', resetEmail);
           Fliplet.Security.Storage.update().then(function () {
 
