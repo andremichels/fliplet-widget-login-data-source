@@ -70,7 +70,7 @@ $('[data-login-ds-id]').each(function(){
       });
     }).then(function(entries){
       if(entries.length) {
-        return success_callback(entry[0]);
+        return success_callback(entries[0]);
       }
 
       fail_callback(true);
@@ -86,7 +86,7 @@ $('[data-login-ds-id]').each(function(){
       });
     }).then(function(entries){
       if (entries.length) {
-        return success_callback(entry[0]);
+        return success_callback(entries[0]);
       }
 
       fail_callback(true);
