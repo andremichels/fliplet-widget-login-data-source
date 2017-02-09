@@ -182,23 +182,11 @@ $('[data-login-ds-id]').each(function(){
 
           });
         }, function ( error ) {
-          if ( error ) {
-            // EMAIL NOT FOUND ON DATA SOURCE
-
-            // Reset Login button
-            _this.removeClass('loading');
-            _this.find('span').removeClass('hidden');
-            _this.find('.loader').removeClass('show');
-            _this.parents('.form-btns').find('.text-danger').html("We couldn't find your email in our system. Please try again.").removeClass('hidden');
-          } else {
-            // EMAIL FOUND ON DATA SOURCE BUT PASS DOESN'T MATCH
-
-            // Reset Login button
-            _this.removeClass('loading');
-            _this.find('span').removeClass('hidden');
-            _this.find('.loader').removeClass('show');
-            _this.parents('.form-btns').find('.text-danger').html("Your email or password don't match. Please try again.").removeClass('hidden');
-          }
+          // Reset Login button
+          _this.removeClass('loading');
+          _this.find('span').removeClass('hidden');
+          _this.find('.loader').removeClass('show');
+          _this.parents('.form-btns').find('.text-danger').html("Your email or password don't match. Please try again.").removeClass('hidden');
         });
       } else {
         // INVALID EMAIL
@@ -281,21 +269,11 @@ $('[data-login-ds-id]').each(function(){
           });
 
         }, function ( error ) {
-          if ( error ) {
-            // EMAIL NOT FOUND ON DATA SOURCE
-            _this.removeClass("disabled");
-            $container.find('.reset-email-error').html("We couldn't find your email in our system. Please try again.").removeClass('hidden');
-            $container.find('.state[data-state=verify-email] .form-group').addClass('has-error');
-            calculateElHeight($container.find('.state[data-state=verify-email]'));
-          } else {
-            // EMAIL FOUND ON DATA SOURCE BUT IT'S NOT REGISTERED
-            // MEANS NO PASSWORD FOUND
-            _this.removeClass("disabled");
-            $container.find('.reset-email-error').html("You don't seem to be registered in our system. Please try registering first.").removeClass('hidden');
-            $container.find('.state[data-state=verify-email] .form-group').addClass('has-error');
-            calculateElHeight($container.find('.state[data-state=verify-email]'));
-          }
-
+          // EMAIL NOT FOUND ON DATA SOURCE
+          _this.removeClass("disabled");
+          $container.find('.reset-email-error').html("We couldn't find your email in our system. Please try again.").removeClass('hidden');
+          $container.find('.state[data-state=verify-email] .form-group').addClass('has-error');
+          calculateElHeight($container.find('.state[data-state=verify-email]'));
         });
 
       } else {
