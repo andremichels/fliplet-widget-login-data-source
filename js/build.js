@@ -63,53 +63,33 @@ $('[data-login-ds-id]').each(function(){
 
   }
 
-  function loginFromDataSource(data_source_id, email_object, pass_column, pass, success_callback, fail_callback) {
-    //read_data_sources -> OK.
-
+  function loginFromDataSource(data_source_id, where, success_callback, fail_callback) {
     Fliplet.DataSources.connect(data_source_id, { offline: false }).then(function(dataSource){
       return dataSource.find({
-        where: email_object
+        where: where
       });
     }).then(function(entries){
       if(entries.length) {
-        entries.forEach(function(entry) {
-          if ( entry.data[pass_column] == pass ) {
-            success_callback(entry);
-            return;
-          } else {
-            fail_callback(false);
-            return;
-          }
-        });
-      } else {
-        fail_callback(true);
+        return success_callback(entry[0]);
       }
+
+      fail_callback(true);
     }, function() {
       fail_callback(true);
     });
   }
 
-  function resetFromDataSource(data_source_id, email_object, pass_column, success_callback, fail_callback) {
-    //read_data_sources -> OK.
-
+  function resetFromDataSource(data_source_id, where, success_callback, fail_callback) {
     Fliplet.DataSources.connect(data_source_id, { offline: false }).then(function(dataSource){
       return dataSource.find({
-        where: email_object
+        where: where
       });
     }).then(function(entries){
-      if(entries.length) {
-        entries.forEach(function(entry) {
-          if ( entry.data[pass_column] !== null ) {
-            success_callback(entry);
-            return;
-          } else {
-            fail_callback(false);
-            return;
-          }
-        });
-      } else {
-        fail_callback(true);
+      if (entries.length) {
+        success_callback(entry[0]);
       }
+
+      fail_callback(true);
     }, function() {
       fail_callback(true);
     });
@@ -181,7 +161,10 @@ $('[data-login-ds-id]').each(function(){
 
       if (validateEmail(profileEmail)) {
         // CHECK FOR EMAIL ON DATA SOURCE
-        loginFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, '{"' + DATA_DIRECTORY_EMAIL_COLUMN+'":' + '"' + profileEmail + '"}', DATA_DIRECTORY_PASS_COLUMN, profilePassword, function (entry) {
+        var where = {};
+        where[DATA_DIRECTORY_EMAIL_COLUMN] = profileEmail;
+        where[DATA_DIRECTORY_PASS_COLUMN] = profilePassword;
+        loginFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, where, function (entry) {
           // Reset Login button
           userDataPV.entry = entry;
           userDataPV.userLogged = true;
@@ -270,7 +253,9 @@ $('[data-login-ds-id]').each(function(){
       // VALIDATE EMAIL
       if (validateEmail(resetEmail)) {
         // CHECK FOR EMAIL ON DATA SOURCE
-        resetFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, '{"' + DATA_DIRECTORY_EMAIL_COLUMN+'":' + '"' + resetEmail + '"}', DATA_DIRECTORY_PASS_COLUMN, function (entry) {
+        var where = {};
+        where[DATA_DIRECTORY_EMAIL_COLUMN] = resetEmail;
+        resetFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, where, function (entry) {
           // EMAIL FOUND ON DATA SOURCE
           userDataPV.email = resetEmail;
           userDataPV.entry = entry;
