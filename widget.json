@@ -15,7 +15,8 @@
       "handlebars",
       "fliplet-datasources",
       "fliplet-studio-ui",
-      "bootstrap"
+      "bootstrap",
+      "tinymce"
     ],
     "assets": [
       "vendor/jquery.debounce.js",
@@ -41,6 +42,7 @@
   },
   "references": [
     "loginAction.page:page",
-    "resetAction.page:page"
+    "resetAction.page:page",
+    "dataSourceId:dataSource"
   ]
 }
