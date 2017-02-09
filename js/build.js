@@ -86,7 +86,7 @@ $('[data-login-ds-id]').each(function(){
       });
     }).then(function(entries){
       if (entries.length) {
-        success_callback(entry[0]);
+        return success_callback(entry[0]);
       }
 
       fail_callback(true);
