@@ -64,53 +64,33 @@ $('[data-login-ds-id]').each(function(){
 
   }
 
-  function loginFromDataSource(data_source_id, email_object, pass_column, pass, success_callback, fail_callback) {
-    //read_data_sources -> OK.
-
+  function loginFromDataSource(data_source_id, where, success_callback, fail_callback) {
     Fliplet.DataSources.connect(data_source_id, { offline: false }).then(function(dataSource){
       return dataSource.find({
-        where: email_object
+        where: where
       });
     }).then(function(entries){
       if(entries.length) {
-        entries.forEach(function(entry) {
-          if ( entry.data[pass_column] == pass ) {
-            success_callback(entry);
-            return;
-          } else {
-            fail_callback(false);
-            return;
-          }
-        });
-      } else {
-        fail_callback(true);
+        return success_callback(entries[0]);
       }
+
+      fail_callback(true);
     }, function() {
       fail_callback(true);
     });
   }
 
-  function resetFromDataSource(data_source_id, email_object, pass_column, success_callback, fail_callback) {
-    //read_data_sources -> OK.
-
+  function resetFromDataSource(data_source_id, where, success_callback, fail_callback) {
     Fliplet.DataSources.connect(data_source_id, { offline: false }).then(function(dataSource){
       return dataSource.find({
-        where: email_object
+        where: where
       });
     }).then(function(entries){
-      if(entries.length) {
-        entries.forEach(function(entry) {
-          if ( entry.data[pass_column] !== null ) {
-            success_callback(entry);
-            return;
-          } else {
-            fail_callback(false);
-            return;
-          }
-        });
-      } else {
-        fail_callback(true);
+      if (entries.length) {
+        return success_callback(entries[0]);
       }
+
+      fail_callback(true);
     }, function() {
       fail_callback(true);
     });
@@ -182,7 +162,10 @@ $('[data-login-ds-id]').each(function(){
 
       if (validateEmail(profileEmail)) {
         // CHECK FOR EMAIL ON DATA SOURCE
-        loginFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, '{"' + DATA_DIRECTORY_EMAIL_COLUMN+'":' + '"' + profileEmail + '"}', DATA_DIRECTORY_PASS_COLUMN, profilePassword, function (entry) {
+        var where = {};
+        where[DATA_DIRECTORY_EMAIL_COLUMN] = profileEmail;
+        where[DATA_DIRECTORY_PASS_COLUMN] = profilePassword;
+        loginFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, where, function (entry) {
           // Reset Login button
           userDataPV.entry = entry;
           userDataPV.userLogged = true;
@@ -201,23 +184,11 @@ $('[data-login-ds-id]').each(function(){
 
           });
         }, function ( error ) {
-          if ( error ) {
-            // EMAIL NOT FOUND ON DATA SOURCE
-
-            // Reset Login button
-            _this.removeClass('loading');
-            _this.find('span').removeClass('hidden');
-            _this.find('.loader').removeClass('show');
-            _this.parents('.form-btns').find('.text-danger').html("We couldn't find your email in our system. Please try again.").removeClass('hidden');
-          } else {
-            // EMAIL FOUND ON DATA SOURCE BUT PASS DOESN'T MATCH
-
-            // Reset Login button
-            _this.removeClass('loading');
-            _this.find('span').removeClass('hidden');
-            _this.find('.loader').removeClass('show');
-            _this.parents('.form-btns').find('.text-danger').html("Your email or password don't match. Please try again.").removeClass('hidden');
-          }
+          // Reset Login button
+          _this.removeClass('loading');
+          _this.find('span').removeClass('hidden');
+          _this.find('.loader').removeClass('show');
+          _this.parents('.form-btns').find('.text-danger').html("Your email or password don't match. Please try again.").removeClass('hidden');
         });
       } else {
         // INVALID EMAIL
@@ -272,7 +243,9 @@ $('[data-login-ds-id]').each(function(){
       // VALIDATE EMAIL
       if (validateEmail(resetEmail)) {
         // CHECK FOR EMAIL ON DATA SOURCE
-        resetFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, '{"' + DATA_DIRECTORY_EMAIL_COLUMN+'":' + '"' + resetEmail + '"}', DATA_DIRECTORY_PASS_COLUMN, function (entry) {
+        var where = {};
+        where[DATA_DIRECTORY_EMAIL_COLUMN] = resetEmail;
+        resetFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, where, function (entry) {
           // EMAIL FOUND ON DATA SOURCE
           userDataPV.email = resetEmail;
           userDataPV.entry = entry;
@@ -301,21 +274,11 @@ $('[data-login-ds-id]').each(function(){
           });
 
         }, function ( error ) {
-          if ( error ) {
-            // EMAIL NOT FOUND ON DATA SOURCE
-            _this.removeClass("disabled");
-            $container.find('.reset-email-error').html("We couldn't find your email in our system. Please try again.").removeClass('hidden');
-            $container.find('.state[data-state=verify-email] .form-group').addClass('has-error');
-            calculateElHeight($container.find('.state[data-state=verify-email]'));
-          } else {
-            // EMAIL FOUND ON DATA SOURCE BUT IT'S NOT REGISTERED
-            // MEANS NO PASSWORD FOUND
-            _this.removeClass("disabled");
-            $container.find('.reset-email-error').html("You don't seem to be registered in our system. Please try registering first.").removeClass('hidden');
-            $container.find('.state[data-state=verify-email] .form-group').addClass('has-error');
-            calculateElHeight($container.find('.state[data-state=verify-email]'));
-          }
-
+          // EMAIL NOT FOUND ON DATA SOURCE
+          _this.removeClass("disabled");
+          $container.find('.reset-email-error').html("We couldn't find your email in our system. Please try again.").removeClass('hidden');
+          $container.find('.state[data-state=verify-email] .form-group').addClass('has-error');
+          calculateElHeight($container.find('.state[data-state=verify-email]'));
         });
 
       } else {
