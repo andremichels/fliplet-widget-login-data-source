@@ -125,7 +125,7 @@ Fliplet.Widget.emit(validInputEventName, {
 });
 
 Fliplet.DataSources.get({ organizationId: organizationId }).then(function (dataSources) {
-  allDataSources = dataSources;
+  allDataSources = dataSources || [];
   dataSources.forEach(renderDataSource);
   return Promise.resolve();
 }).then(initialiseData);
