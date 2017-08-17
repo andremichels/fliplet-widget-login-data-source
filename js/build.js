@@ -68,7 +68,7 @@ $('[data-login-ds-id]').each(function() {
   function loginFromDataSource(data_source_id, where, success_callback, fail_callback) {
     return Fliplet.Session.authorize({
       passport: "dataSource",
-      dataSourceId: 22,
+      dataSourceId: data_source_id,
       where: where
     })
       .then(function(authorization) {
