@@ -1,5 +1,5 @@
 {
-  "name": "Login",
+  "name": "Login data source",
   "package": "com.fliplet.login-data-source",
   "version": "1.0.0",
   "icon": "img/icon.png",
@@ -32,7 +32,8 @@
       "font-awesome",
       "fliplet-security",
       "fliplet-communicate",
-      "fliplet-datasources"
+      "fliplet-datasources",
+      "fliplet-session"
     ],
     "assets": [
       "vendor/moment.js",
