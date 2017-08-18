@@ -66,21 +66,17 @@ $('[data-login-ds-id]').each(function() {
   }
 
   function loginFromDataSource(data_source_id, where, success_callback, fail_callback) {
-    Fliplet.DataSources.connect(data_source_id, {
-      offline: false
-    }).then(function(dataSource) {
-      return dataSource.find({
-        where: where
+    return Fliplet.Session.authorize({
+      passport: "dataSource",
+      dataSourceId: data_source_id,
+      where: where
+    })
+      .then(function(authorization) {
+        success_callback(authorization.session.entries.dataSource)
+      })
+      .catch(function() {
+        fail_callback(true);
       });
-    }).then(function(entries) {
-      if (entries.length) {
-        return success_callback(entries[0]);
-      }
-
-      fail_callback(true);
-    }, function() {
-      fail_callback(true);
-    });
   }
 
   function resetFromDataSource(data_source_id, where, success_callback, fail_callback) {
@@ -155,10 +151,7 @@ $('[data-login-ds-id]').each(function() {
       _this.parents('.form-btns').find('.text-danger').addClass('hidden');
 
       window.profileEmail = $container.find('input.profile_email').val().toLowerCase(); // GET EMAIL VALUE
-
-      // @TODO: Add SALT and change HASHING method
-      var hashedPass = $container.find('input.profile_password').val().hashCode();
-      window.profilePassword = hashedPass;
+      window.profilePassword = $container.find('input.profile_password').val();
 
       // Triggers loading
       $(this).addClass('loading');
