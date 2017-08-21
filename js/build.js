@@ -211,6 +211,14 @@ $('[data-login-ds-id]').each(function() {
     // Just switches views Login to Email verification
     // Leave as it is
     $container.find('.btn-forget-pass').on('click', function() {
+      // New logic redirects to another screen that should contain an email verification widget
+      if (typeof data.resetAction !== "undefined") {
+        return Fliplet.Navigate.to(data.resetAction);
+      }
+
+      return;
+
+      // Olg logic
       $container.find('.fl-login-holder').fadeOut(100);
       setTimeout(function() {
         $container.find('.fl-restore-pass').fadeIn(250);
