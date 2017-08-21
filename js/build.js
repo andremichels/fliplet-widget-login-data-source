@@ -35,17 +35,22 @@ $('[data-login-ds-id]').each(function() {
 
   function initEmailValidation() {
     Fliplet.Navigator.onReady().then(function() {
-
       Fliplet.Security.Storage.init().then(function() {
         attachEventListeners();
-        setUserDataPV(function() {
-          if ((userDataPV.userLogged || userDataPV.userReset) && !Fliplet.Env.get('interact')) {
-            if (typeof data.loginAction !== "undefined") {
-              Fliplet.Navigate.to(data.loginAction);
-            }
-          }
-        }, function() {});
+        setUserDataPV(function() {}, function() {});
       });
+
+      // New logic to redirect
+      // Check if user is already verified
+      Fliplet.App.Storage.get('fl-login-data-source')
+        .then(function(value) {
+          if (!value || !data.loginAction) {
+            return;
+          }
+          setTimeout(function() {
+            Fliplet.Navigate.to(data.loginAction);
+          }, 1000);
+        });
     });
   }
 
