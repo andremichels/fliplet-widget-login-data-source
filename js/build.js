@@ -33,6 +33,10 @@ $('[data-login-ds-id]').each(function() {
     ORG_NAME = Fliplet.Env.get('organizationName'),
     OVERRIDE_CODE = '999999';
 
+  if (Fliplet.Navigate.query.error) {
+    $('.fl-login-form .text-danger').html(Fliplet.Navigate.query.error).removeClass('hidden');
+  }
+
   function initEmailValidation() {
     Fliplet.Navigator.onReady().then(function() {
 
