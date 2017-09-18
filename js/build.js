@@ -34,7 +34,7 @@ $('[data-login-ds-id]').each(function() {
     OVERRIDE_CODE = '999999';
 
   if (Fliplet.Navigate.query.error) {
-    $('.fl-login-form .text-danger').html(Fliplet.Navigate.query.error).removeClass('hidden');
+    $container.find('.login-error').html(Fliplet.Navigate.query.error).removeClass('hidden');
   }
 
   function initEmailValidation() {
@@ -156,7 +156,7 @@ $('[data-login-ds-id]').each(function() {
 
     $container.find('.btn-login').on('click', function() {
       var _this = $(this);
-      _this.parents('.form-btns').find('.text-danger').addClass('hidden');
+      _this.parents('.form-btns').find('.login-error').addClass('hidden');
 
       window.profileEmail = $container.find('input.profile_email').val().toLowerCase(); // GET EMAIL VALUE
 
@@ -199,7 +199,7 @@ $('[data-login-ds-id]').each(function() {
           _this.removeClass('loading');
           _this.find('span').removeClass('hidden');
           _this.find('.loader').removeClass('show');
-          _this.parents('.form-btns').find('.text-danger').html("Your email or password don't match. Please try again.").removeClass('hidden');
+          _this.parents('.form-btns').find('.login-error').html("Your email or password don't match. Please try again.").removeClass('hidden');
         });
       } else {
         // INVALID EMAIL
@@ -209,7 +209,7 @@ $('[data-login-ds-id]').each(function() {
         _this.find('span').removeClass('hidden');
         _this.find('.loader').removeClass('show');
         // Show error
-        _this.parents('.form-btns').find('.text-danger').html("Please enter a valid email.").removeClass('hidden');
+        _this.parents('.form-btns').find('.login-error').html("Please enter a valid email.").removeClass('hidden');
       }
     });
 
