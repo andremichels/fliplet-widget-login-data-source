@@ -429,13 +429,40 @@ $('[data-login-ds-id]').each(function() {
                   $container.find('.state[data-state=all-done]').removeClass('future').addClass('present');
                 })
                 .catch(function onPasswordUpdateError () {
-                  // TODO: Show proper message
                   // Query failed due to some datasource missconfiguration or access denied
+                  _this.removeClass('loading');
+                  _this.find('span').removeClass('hidden');
+                  _this.find('.loader').removeClass('show');
+
+                  $container.find('.reset-password-error').html('Something went wrong! Try again.');
+                  $container.find('.reset-password-error').removeClass('hidden');
                 });
             });
           } else {
-            // TODO: Show proper message
             // User tried to update password without being verified
+            _this.removeClass('loading');
+            _this.find('span').removeClass('hidden');
+            _this.find('.loader').removeClass('show');
+
+            $container.find('.state.present').removeClass('present').addClass('future');
+
+            $container.find('.reset-email-field').val(""); // RESETS EMAIL VALUE
+            $container.find('.pin-code-field').val(""); // RESETS PIN
+
+            //check the validation current state.
+            if (userDataPV.code !== "" && userDataPV.code_generated_at > Date.now() - (CODE_VALID * 60 * 1000)) {
+              $container.find('.have-code').removeClass('hidden');
+            }
+
+            $container.find('.authenticate').removeClass('loading');
+            $container.find('.authenticate').find('span').removeClass('hidden');
+            $container.find('.authenticate').find('.loader').removeClass('show');
+
+            $container.find('.reset-email-error').html("You need to verify your email first.").removeClass('hidden');
+            $container.find('.state[data-state=verify-email] .form-group').addClass('has-error');
+
+            calculateElHeight($container.find('.state[data-state=verify-email]'));
+            $container.find('.state[data-state=verify-email]').removeClass('past').addClass('present');
           }
         } else {
           $container.find('.reset-password-error').html('Passwords don\'t match. Try again.');
