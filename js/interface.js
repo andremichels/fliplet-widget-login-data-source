@@ -19,13 +19,22 @@ var fields = [
   'passColumn'
 ];
 
+var linkData = $.extend(true, {
+  action: 'screen',
+  page: 'none',
+  transition: 'slide.left',
+  options: {
+    hideAction: true
+  }
+}, data.loginAction);
+
 var loginActionProvider = Fliplet.Widget.open('com.fliplet.link', {
   // If provided, the iframe will be appended here,
   // otherwise will be displayed as a full-size iframe overlay
   selector: '#login-link-action',
   // Also send the data I have locally, so that
   // the interface gets repopulated with the same stuff
-  data: data.loginAction,
+  data: linkData,
   // Events fired from the provider
   onEvent: function (event, data) {
     if (event === 'interface-validate') {
