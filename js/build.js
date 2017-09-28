@@ -215,14 +215,6 @@ $('[data-login-ds-id]').each(function() {
     // Just switches views Login to Email verification
     // Leave as it is
     $container.find('.btn-forget-pass').on('click', function() {
-      // New logic redirects to another screen that should contain an email verification widget
-      if (typeof data.resetAction !== "undefined") {
-        return Fliplet.Navigate.to(data.resetAction);
-      }
-
-      return;
-
-      // Olg logic
       $container.find('.fl-login-holder').fadeOut(100);
       setTimeout(function() {
         $container.find('.fl-restore-pass').fadeIn(250);
@@ -379,8 +371,8 @@ $('[data-login-ds-id]').each(function() {
             _this.find('.loader').removeClass('show');
 
             $container.find('.state.present').removeClass('present').addClass('past');
-            calculateElHeight($container.find('.state[data-state=all-done]'));
-            $container.find('.state[data-state=all-done]').removeClass('future').addClass('present');
+            calculateElHeight($container.find('.state[data-state=reset-password]'));
+            $container.find('.state[data-state=reset-password]').removeClass('future').addClass('present');
 
             // Analytics - Info Event
             Fliplet.Analytics.info({
@@ -397,6 +389,51 @@ $('[data-login-ds-id]').each(function() {
         $container.find('.state[data-state=verify-code] .form-group').addClass('has-error');
         $container.find('.pin-verify-error').removeClass('hidden');
         calculateElHeight($container.find('.state[data-state=verify-code]'));
+      }
+    });
+
+    // UPDATE PASSWORD
+    $container.find('.update-password').on('click', function() {
+      var _this = $(this);
+
+      $container.find('.reset-password-error').addClass('hidden');
+
+      // Simulates loading
+      $(this).addClass('loading');
+      $(this).find('span').addClass('hidden');
+      $(this).find('.loader').addClass('show');
+
+      var newPassword = $container.find('.new-password').val();
+      var confirmPassword = $container.find('.confirm-password').val();
+
+      if (newPassword !== '' || confirmPassword !== '') {
+        if (newPassword === confirmPassword) {
+          // @TODO: UPDATE PASSWORD
+          // AFTER PASSWORD IS UPDATED USE THE CODE BELLOW TO TRANSITION TO THE LAST STATE
+          _this.removeClass('loading');
+          _this.find('span').removeClass('hidden');
+          _this.find('.loader').removeClass('show');
+
+          $container.find('.state.present').removeClass('present').addClass('past');
+          calculateElHeight($container.find('.state[data-state=all-done]'));
+          $container.find('.state[data-state=all-done]').removeClass('future').addClass('present');
+        } else {
+          $container.find('.reset-password-error').html('Passwords don\'t match. Try again.');
+          $container.find('.reset-password-error').removeClass('hidden');
+
+          // Removes loading
+          $(this).removeClass('loading');
+          $(this).find('span').removeClass('hidden');
+          $(this).find('.loader').removeClass('show');
+        }
+      } else {
+        $container.find('.reset-password-error').html('Enter a new password and confirm. Try again.');
+        $container.find('.reset-password-error').removeClass('hidden');
+
+        // Removes loading
+        $(this).removeClass('loading');
+        $(this).find('span').removeClass('hidden');
+        $(this).find('.loader').removeClass('show');
       }
     });
 
@@ -425,12 +462,6 @@ $('[data-login-ds-id]').each(function() {
       }, function() {
         $container.find('.pin-sent-error').text(CONTACT_UNREACHABLE).removeClass("hidden");
       });
-    });
-
-    $container.find('.reset-continue').on('click', function() {
-      if (typeof data.resetAction !== "undefined") {
-        Fliplet.Navigate.to(data.resetAction);
-      }
     });
   }
 

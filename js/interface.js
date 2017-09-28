@@ -34,21 +34,6 @@ var loginActionProvider = Fliplet.Widget.open('com.fliplet.link', {
   }
 });
 
-var resetActionProvider = Fliplet.Widget.open('com.fliplet.link', {
-  // If provided, the iframe will be appended here,
-  // otherwise will be displayed as a full-size iframe overlay
-  selector: '#reset-link-action',
-  // Also send the data I have locally, so that
-  // the interface gets repopulated with the same stuff
-  data: data.resetAction,
-  // Events fired from the provider
-  onEvent: function (event, data) {
-    if (event === 'interface-validate') {
-      Fliplet.Widget.toggleSaveButton(data.isValid === true);
-    }
-  }
-});
-
 // TinyMCE INIT
 tinymce.init({
   selector: '#validationEmail',
@@ -83,17 +68,11 @@ Fliplet.Widget.onSaveRequest(function () {
 $('form').submit(function (event) {
   event.preventDefault();
   loginActionProvider.forwardSaveRequest();
-  resetActionProvider.forwardSaveRequest();
 });
 
 // 3. Fired when the provider has finished
 loginActionProvider.then(function (result) {
   data.loginAction = result.data;
-  save(true);
-});
-
-resetActionProvider.then(function (result) {
-  data.resetAction = result.data;
   save(true);
 });
 
