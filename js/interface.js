@@ -16,7 +16,8 @@ var defaultEmailTemplate = $('#template-email-validation').html();
 var fields = [
   'dataSource',
   'emailColumn',
-  'passColumn'
+  'passColumn',
+  'emailTemplate'
 ];
 
 var linkData = $.extend(true, {
@@ -66,7 +67,7 @@ tinymce.init({
       }
     });
     editor.on('keyup paste', function(e) {
-      data.emailTemplate = ed.getContent();
+      data.emailTemplate = editor.getContent();
     });
   }
 });
