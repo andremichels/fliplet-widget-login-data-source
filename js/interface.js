@@ -11,7 +11,7 @@ var templates = {
   dataSourceEntry: template('data-source-entry')
 };
 
-var emailTemplate = $('#template-email-validation').html();
+var defaultEmailTemplate = $('#template-email-validation').html();
 
 var fields = [
   'dataSource',
@@ -62,8 +62,11 @@ tinymce.init({
       if ("emailTemplate" in data && data.emailTemplate !== "") {
         tinymce.get('validationEmail').setContent(data.emailTemplate);
       } else {
-        tinymce.get('validationEmail').setContent(emailTemplate);
+        tinymce.get('validationEmail').setContent(defaultEmailTemplate);
       }
+    });
+    editor.on('keyup paste', function(e) {
+      data.emailTemplate = ed.getContent();
     });
   }
 });
@@ -96,16 +99,38 @@ function save(notifyComplete) {
     data[fieldId] = $('#' + fieldId).val();
   });
 
-  data.emailTemplate = tinymce.get('validationEmail').getContent() || emailTemplate;
-
-  Fliplet.Widget.save(data).then(function () {
-    if (notifyComplete) {
-      Fliplet.Widget.complete();
-      window.location.reload();
-    } else {
-      Fliplet.Studio.emit('reload-widget-instance', widgetId);
+  
+  
+  var definition = currentDataSource.definition || {};
+  var validation = {
+    email: {
+      domain: false,
+      expire: "60",
+      domains: [],
+      template: {
+        to: [],
+        html: data.emailTemplate || defaultEmailTemplate,
+        subject: "Validate your email address"
+      },
+      toColumn: data.emailColumn,
+      matchColumn: data.emailColumn
     }
-  });
+  };
+  definition.validation = validation;
+
+  // Update data source definitions
+  var options = { id: data.dataSource, definition: definition };
+  Fliplet.DataSources.update(options)
+    .then(function() {
+      Fliplet.Widget.save(data).then(function () {
+        if (notifyComplete) {
+          Fliplet.Widget.complete();
+          window.location.reload();
+        } else {
+          Fliplet.Studio.emit('reload-widget-instance', widgetId);
+        }
+      });
+    })
 }
 
 Fliplet.Widget.emit(validInputEventName, {
@@ -146,6 +171,7 @@ $('#dataSource').on('change', function onDataSourceListChange() {
 
   allDataSources.forEach(function(dataSource){
     if(dataSource.id == selectedValue && typeof dataSource.columns !== "undefined") {
+      currentDataSource = dataSource;
       dataSource.columns.forEach(renderDataSourceColumn);
     }
   });
@@ -161,7 +187,7 @@ $('#emailColumn, #passColumn').on('change', function() {
   });
 });
 
-$('#allow_reset').on('change', $.debounce(function() {
+$('#allow_reset').on('change', function() {
 
   if ( $(this).is(':checked') ) {
   	$('.reset-pass-redirect').removeClass('hidden');
@@ -176,7 +202,7 @@ $('#allow_reset').on('change', $.debounce(function() {
   }
 
   initialLoadingDone = true;
-}, 0));
+});
 
 $('#help_tip').on('click', function() {
   alert("During beta, please use live chat and let us know what you need help with.");
