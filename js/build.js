@@ -406,17 +406,37 @@ $('[data-login-ds-id]').each(function() {
       var newPassword = $container.find('.new-password').val();
       var confirmPassword = $container.find('.confirm-password').val();
 
-      if (newPassword !== '' || confirmPassword !== '') {
+      if (newPassword || confirmPassword) {
         if (newPassword === confirmPassword) {
-          // @TODO: UPDATE PASSWORD
-          // AFTER PASSWORD IS UPDATED USE THE CODE BELLOW TO TRANSITION TO THE LAST STATE
-          _this.removeClass('loading');
-          _this.find('span').removeClass('hidden');
-          _this.find('.loader').removeClass('show');
-
-          $container.find('.state.present').removeClass('present').addClass('past');
-          calculateElHeight($container.find('.state[data-state=all-done]'));
-          $container.find('.state[data-state=all-done]').removeClass('future').addClass('present');
+          if (session.entries && session.entries.dataSource) {
+            entryId = 'session'; // this works because you can use it as an ID on the backend
+            entry = session.entries.dataSource;
+            return Fliplet.DataSources.connect(data.dataSource).then(function(dataSource) {
+              var options = {
+                type: update,
+                dataSourceEntryId: entryId,
+                data: {}
+              };
+              options.data[data.passColumn] = newPassword;
+              return dataSource.query(options)
+                .then(function onPasswordUpdateSuccess() {
+                  _this.removeClass('loading');
+                  _this.find('span').removeClass('hidden');
+                  _this.find('.loader').removeClass('show');
+        
+                  $container.find('.state.present').removeClass('present').addClass('past');
+                  calculateElHeight($container.find('.state[data-state=all-done]'));
+                  $container.find('.state[data-state=all-done]').removeClass('future').addClass('present');
+                })
+                .catch(function onPasswordUpdateError () {
+                  // TODO: Show proper message
+                  // Query failed due to some datasource missconfiguration or access denied
+                });
+            });
+          } else {
+            // TODO: Show proper message
+            // User tried to update password without being verified
+          }
         } else {
           $container.find('.reset-password-error').html('Passwords don\'t match. Try again.');
           $container.find('.reset-password-error').removeClass('hidden');
