@@ -49,18 +49,18 @@
 
     <div class="state future" data-state="verify-code">
       <h1>Enter verification code</h1>
-      <p>Enter the pin code that was sent to <span class="verify-user-email">hcarneiro@fliplet.com</span>.</p>
+      <p>A verification code was sent to <span class="verify-user-email"></span>.</p>
       <div class="input-wrapper">
-        <input type="text" class="form-control pin-code-field" placeholder="Enter pin code" />
+        <input type="text" class="form-control pin-code-field" placeholder="Enter verification code" />
         <span class="fa fa-angle-left back start"></span>
       </div>
-      <p class="text-danger pin-verify-error hidden">You entered the wrong code or the code expired. Try again or request a new code.</p>
+      <p class="text-danger pin-verify-error hidden">You entered the wrong code or the code expired. Please try again or request a new code.</p>
       <p class="text-danger pin-sent-error hidden">...</p>
       <div class="btn btn-primary authenticate">
         <span>Verify</span>
         <div class="loader">Loading...</div>
       </div>
-      <div class="btn btn-link resend-code hidden">Resend pin code</div>
+      <div class="btn btn-link resend-code hidden">Resend verification code</div>
       <p class="text-success pin-sent-success hidden">A new code was sent to your email.</p>
       <hr>
       <div class="btn btn-secondary back-login">Login</div>
