@@ -11,7 +11,7 @@ var templates = {
   dataSourceEntry: template('data-source-entry')
 };
 
-var defaultEmailTemplate = $('#template-email-validation').html();
+var defaultEmailTemplate = $('#template-email-default').html();
 
 var fields = [
   'dataSource',
