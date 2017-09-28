@@ -15,6 +15,7 @@ $('[data-login-ds-id]').each(function() {
   var widgetId = $container.attr('data-login-ds-id');
   var widgetUuid = $container.attr('data-login-ds-uuid');
   var data = Fliplet.Widget.getData(widgetId);
+  var dataSourceEntry; // Data source entry after user verify email
 
   this.pvName = 'login_data_source_component_' + Fliplet.Env.get('appId');
   var dataStructure = {
@@ -25,13 +26,11 @@ $('[data-login-ds-id]').each(function() {
   };
 
   var CODE_VALID = 30,
-    CODE_LENGTH = 6,
     APP_NAME = Fliplet.Env.get('appName'),
     APP_VALIDATION_DATA_DIRECTORY_ID = data.dataSource,
     DATA_DIRECTORY_EMAIL_COLUMN = data.emailColumn,
     DATA_DIRECTORY_PASS_COLUMN = data.passColumn,
-    ORG_NAME = Fliplet.Env.get('organizationName'),
-    OVERRIDE_CODE = '999999';
+    ORG_NAME = Fliplet.Env.get('organizationName');
 
   if (Fliplet.Navigate.query.error) {
     $container.find('.login-error').html(Fliplet.Navigate.query.error).removeClass('hidden');
@@ -89,68 +88,14 @@ $('[data-login-ds-id]').each(function() {
   }
 
   function resetFromDataSource(data_source_id, where, success_callback, fail_callback) {
-    Fliplet.DataSources.connect(data_source_id, {
-      offline: false
-    }).then(function(dataSource) {
-      return dataSource.find({
-        where: where
+    Fliplet.DataSources.connect(data.dataSource, { offline: false })
+      .then(function(dataSource) {
+        dataSource.sendValidation({type: 'email', where: where})
+          .then(success_callback)
+          .catch(function () {
+            fail_callback(true);
+          });
       });
-    }).then(function(entries) {
-      if (entries.length) {
-        return success_callback(entries[0]);
-      }
-
-      fail_callback(true);
-    }, function() {
-      fail_callback(true);
-    });
-  }
-
-  function sendEmail(body, replyTo, subject, to, success_callback, fail_callback) {
-
-    var options = {
-      "to": [{
-        "email": to,
-        "name": "",
-        "type": "to"
-      }],
-      "html": body,
-      "subject": subject
-    };
-
-    Fliplet.Communicate.sendEmail(options).then(success_callback, fail_callback);
-
-  }
-
-  function sendNotification(contact, success_callback, fail_callback) {
-
-    // Let's update the PV with this new data
-    userDataPV.code = rDigits(CODE_LENGTH);
-    userDataPV.code_generated_at = Date.now();
-    Fliplet.Security.Storage.update().then(function() {
-      var body = generateVerifyBody();
-
-      sendEmail(body, contact, APP_NAME, contact, success_callback, fail_callback);
-    });
-  }
-
-  function generateVerifyBody() {
-    var body;
-    var template = Handlebars.compile(data.emailTemplate);
-    body = template({
-      verification_code: userDataPV.code,
-      time: moment().format('MMM Do YY, h:mm:ss a'),
-      app_name: APP_NAME,
-      organisation_name: ORG_NAME,
-      code_duration: CODE_VALID
-    });
-
-    return body;
-  }
-
-  function rDigits(length) {
-    var r = Math.random().toString().slice(2, length + 2);
-    return r.length === length ? r : rDigits(length);
   }
 
   function attachEventListeners() {
@@ -255,35 +200,15 @@ $('[data-login-ds-id]').each(function() {
         var where = {};
         where[DATA_DIRECTORY_EMAIL_COLUMN] = resetEmail;
         resetFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, where, function(entry) {
-          // EMAIL FOUND ON DATA SOURCE
-          userDataPV.email = resetEmail;
-          userDataPV.entry = entry;
-          userDataPV.userReset = true;
-          // Set PV to be used by Chat
-          Fliplet.App.Storage.set('fl-chat-source-id', entry.dataSourceId);
-          Fliplet.App.Storage.set('fl-chat-auth-email', resetEmail);
-          Fliplet.App.Storage.set('fl-login-data-source', entry);
-          Fliplet.Profile.set('email', resetEmail);
-          Fliplet.Security.Storage.update().then(function() {
-
-            if ($container.find('.state[data-state=verify-email] .form-group').hasClass('has-error')) {
-              $container.find('.state[data-state=verify-email] .form-group').removeClass('has-error');
-            }
-            sendNotification(resetEmail, function() {
-              // TRANSITION
-              $container.find('.state[data-state=verify-email]').removeClass('present').addClass('past');
-
-              $container.find('.verify-user-email').text(resetEmail); // UPDATES TEXT WITH EMAIL
-              _this.removeClass("disabled");
-
-              calculateElHeight($container.find('.state[data-state=verify-code]'));
-              $container.find('.state[data-state=verify-code]').removeClass('future').addClass('present');
-            }, function() {
-              $container.find('.reset-email-error').text(CONTACT_UNREACHABLE).removeClass('hidden');
-            });
-
-          });
-
+          if ($container.find('.state[data-state=verify-email] .form-group').hasClass('has-error')) {
+            $container.find('.state[data-state=verify-email] .form-group').removeClass('has-error');
+          }
+          $container.find('.state[data-state=verify-email]').removeClass('present').addClass('past');
+          $container.find('.verify-user-email').text(resetEmail); // UPDATES TEXT WITH EMAIL
+          _this.removeClass("disabled");
+          calculateElHeight($container.find('.state[data-state=verify-code]'));
+          $container.find('.state[data-state=verify-code]').removeClass('future').addClass('present');
+          
         }, function(error) {
           // EMAIL NOT FOUND ON DATA SOURCE
           _this.removeClass("disabled");
@@ -344,52 +269,60 @@ $('[data-login-ds-id]').each(function() {
       $(this).find('span').addClass('hidden');
       $(this).find('.loader').addClass('show');
 
-      var userPin = $container.find('.pin-code-field').val(),
-        codeIsValid = userDataPV.code_generated_at > Date.now() - (CODE_VALID * 60 * 1000);
-
-      // VERIFY PIN CODE
-      if (userPin === userDataPV.code || userPin === OVERRIDE_CODE) {
-        if (!codeIsValid) {
-          $container.find('.state[data-state=verify-code] .form-group').addClass('has-error');
-          $container.find('.resend-code').removeClass('hidden');
-          _this.removeClass('loading');
-          _this.find('span').removeClass('hidden');
-          _this.find('.loader').removeClass('show');
-          $container.find('.pin-verify-error').removeClass('hidden');
-          calculateElHeight($container.find('.state[data-state=verify-code]'));
-        } else {
-          if ($container.find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
-            $container.find('.state[data-state=verify-code] .form-group').removeClass('has-error');
-          }
-
-          userDataPV.resetVerified = true;
-          userDataPV.code = "";
-          userDataPV.code_generated_at = "";
-          Fliplet.Security.Storage.update().then(function() {
-            _this.removeClass('loading');
-            _this.find('span').removeClass('hidden');
-            _this.find('.loader').removeClass('show');
-
-            $container.find('.state.present').removeClass('present').addClass('past');
-            calculateElHeight($container.find('.state[data-state=reset-password]'));
-            $container.find('.state[data-state=reset-password]').removeClass('future').addClass('present');
-
-            // Analytics - Info Event
-            Fliplet.Analytics.info({
-              email: userDataPV.email,
-              action: 'search'
-            });
-          });
-        }
-      } else {
-        _this.removeClass('loading');
-        _this.find('span').removeClass('hidden');
-        _this.find('.loader').removeClass('show');
-
-        $container.find('.state[data-state=verify-code] .form-group').addClass('has-error');
-        $container.find('.pin-verify-error').removeClass('hidden');
-        calculateElHeight($container.find('.state[data-state=verify-code]'));
-      }
+      var code = $container.find('.pin-code-field').val();
+      Fliplet.DataSources.connect(data.dataSource, { offline: false })
+        .then(function(dataSource) {
+          var where = { code: code };
+          where[data.emailColumn] = resetEmail;
+          
+          Fliplet.Session.get()
+            .then(function() {
+              dataSource.validate({ type: 'email', where: where })
+                .then(function(entry) {
+                  dataSourceEntry = entry;
+                  return Promise.all([
+                    Fliplet.App.Storage.set('fl-chat-source-id', entry.dataSourceId),
+                    Fliplet.App.Storage.set('fl-chat-auth-email', resetEmail),
+                    Fliplet.App.Storage.set('fl-email-verification', entry),
+                    Fliplet.Profile.set('email', resetEmail),
+                    Fliplet.Hooks.run('onUserVerified', { entry: entry })
+                  ]);
+                })
+                .then(function() {
+                  if ($container.find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
+                    $container.find('.state[data-state=verify-code] .form-group').removeClass('has-error');
+                  }
+        
+                  userDataPV.resetVerified = true;
+                  userDataPV.code = "";
+                  userDataPV.code_generated_at = "";
+                  Fliplet.Security.Storage.update().then(function() {
+                    _this.removeClass('loading');
+                    _this.find('span').removeClass('hidden');
+                    _this.find('.loader').removeClass('show');
+        
+                    $container.find('.state.present').removeClass('present').addClass('past');
+                    calculateElHeight($container.find('.state[data-state=reset-password]'));
+                    $container.find('.state[data-state=reset-password]').removeClass('future').addClass('present');
+        
+                    // Analytics - Info Event
+                    Fliplet.Analytics.info({
+                      email: userDataPV.email,
+                      action: 'search'
+                    });
+                  });
+                })
+                .catch(function(error) {
+                  $container.find('.state[data-state=verify-code] .form-group').addClass('has-error');
+                  $container.find('.resend-code').removeClass('hidden');
+                  _this.removeClass('loading');
+                  _this.find('span').removeClass('hidden');
+                  _this.find('.loader').removeClass('show');
+                  $container.find('.pin-verify-error').removeClass('hidden');
+                  calculateElHeight($container.find('.state[data-state=verify-code]'));
+                });
+            })
+        });  
     });
 
     // UPDATE PASSWORD
@@ -408,62 +341,66 @@ $('[data-login-ds-id]').each(function() {
 
       if (newPassword || confirmPassword) {
         if (newPassword === confirmPassword) {
-          if (session.entries && session.entries.dataSource) {
-            entryId = 'session'; // this works because you can use it as an ID on the backend
-            entry = session.entries.dataSource;
-            return Fliplet.DataSources.connect(data.dataSource).then(function(dataSource) {
-              var options = {
-                type: update,
-                dataSourceEntryId: entryId,
-                data: {}
-              };
-              options.data[data.passColumn] = newPassword;
-              return dataSource.query(options)
-                .then(function onPasswordUpdateSuccess() {
-                  _this.removeClass('loading');
-                  _this.find('span').removeClass('hidden');
-                  _this.find('.loader').removeClass('show');
-        
-                  $container.find('.state.present').removeClass('present').addClass('past');
-                  calculateElHeight($container.find('.state[data-state=all-done]'));
-                  $container.find('.state[data-state=all-done]').removeClass('future').addClass('present');
-                })
-                .catch(function onPasswordUpdateError () {
-                  // Query failed due to some datasource missconfiguration or access denied
-                  _this.removeClass('loading');
-                  _this.find('span').removeClass('hidden');
-                  _this.find('.loader').removeClass('show');
-
-                  $container.find('.reset-password-error').html('Something went wrong! Try again.');
-                  $container.find('.reset-password-error').removeClass('hidden');
-                });
-            });
-          } else {
-            // User tried to update password without being verified
-            _this.removeClass('loading');
-            _this.find('span').removeClass('hidden');
-            _this.find('.loader').removeClass('show');
-
-            $container.find('.state.present').removeClass('present').addClass('future');
-
-            $container.find('.reset-email-field').val(""); // RESETS EMAIL VALUE
-            $container.find('.pin-code-field').val(""); // RESETS PIN
-
-            //check the validation current state.
-            if (userDataPV.code !== "" && userDataPV.code_generated_at > Date.now() - (CODE_VALID * 60 * 1000)) {
-              $container.find('.have-code').removeClass('hidden');
+          Fliplet.Session.get().then(function (session) {
+            if (session.entries && session.entries.dataSource) {
+              entryId = 'session'; // this works because you can use it as an ID on the backend
+              entry = session.entries.dataSource;
+              return Fliplet.DataSources.connect(data.dataSource).then(function(dataSource) {
+                var options = {
+                  type: 'update',
+                  where: {},
+                  dataSourceEntryId: dataSourceEntry.id,
+                  data: {}
+                };
+                options.where[data.emailColumn] = resetEmail;
+                options.data[data.passColumn] = newPassword;
+                return dataSource.query(options)
+                  .then(function onPasswordUpdateSuccess() {
+                    _this.removeClass('loading');
+                    _this.find('span').removeClass('hidden');
+                    _this.find('.loader').removeClass('show');
+          
+                    $container.find('.state.present').removeClass('present').addClass('past');
+                    calculateElHeight($container.find('.state[data-state=all-done]'));
+                    $container.find('.state[data-state=all-done]').removeClass('future').addClass('present');
+                  })
+                  .catch(function onPasswordUpdateError () {
+                    // Query failed due to some datasource missconfiguration or access denied
+                    _this.removeClass('loading');
+                    _this.find('span').removeClass('hidden');
+                    _this.find('.loader').removeClass('show');
+  
+                    $container.find('.reset-password-error').html('Something went wrong! Try again.');
+                    $container.find('.reset-password-error').removeClass('hidden');
+                  });
+              });
+            } else {
+              // User tried to update password without being verified
+              _this.removeClass('loading');
+              _this.find('span').removeClass('hidden');
+              _this.find('.loader').removeClass('show');
+  
+              $container.find('.state.present').removeClass('present').addClass('future');
+  
+              $container.find('.reset-email-field').val(""); // RESETS EMAIL VALUE
+              $container.find('.pin-code-field').val(""); // RESETS PIN
+  
+              //check the validation current state.
+              if (userDataPV.code !== "" && userDataPV.code_generated_at > Date.now() - (CODE_VALID * 60 * 1000)) {
+                $container.find('.have-code').removeClass('hidden');
+              }
+  
+              $container.find('.authenticate').removeClass('loading');
+              $container.find('.authenticate').find('span').removeClass('hidden');
+              $container.find('.authenticate').find('.loader').removeClass('show');
+  
+              $container.find('.reset-email-error').html("You need to verify your email first.").removeClass('hidden');
+              $container.find('.state[data-state=verify-email] .form-group').addClass('has-error');
+  
+              calculateElHeight($container.find('.state[data-state=verify-email]'));
+              $container.find('.state[data-state=verify-email]').removeClass('past').addClass('present');
             }
-
-            $container.find('.authenticate').removeClass('loading');
-            $container.find('.authenticate').find('span').removeClass('hidden');
-            $container.find('.authenticate').find('.loader').removeClass('show');
-
-            $container.find('.reset-email-error').html("You need to verify your email first.").removeClass('hidden');
-            $container.find('.state[data-state=verify-email] .form-group').addClass('has-error');
-
-            calculateElHeight($container.find('.state[data-state=verify-email]'));
-            $container.find('.state[data-state=verify-email]').removeClass('past').addClass('present');
-          }
+          });
         } else {
           $container.find('.reset-password-error').html('Passwords don\'t match. Try again.');
           $container.find('.reset-password-error').removeClass('hidden');
@@ -497,18 +434,25 @@ $('[data-login-ds-id]').each(function() {
 
       calculateElHeight($container.find('.state[data-state=verify-code]'));
 
-      sendNotification(emailAddress, function() {
-        $container.find('.pin-code-field').val("");
-        $container.find('.pin-sent-success').removeClass('hidden');
-        if ($container.find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
-          $container.find('.state[data-state=verify-code] .form-group').removeClass('has-error');
-        }
-        if (!$container.find('.resend-code').hasClass('hidden')) {
-          $container.find('.resend-code').addClass('hidden');
-        }
-      }, function() {
-        $container.find('.pin-sent-error').text(CONTACT_UNREACHABLE).removeClass("hidden");
-      });
+      Fliplet.DataSources.connect(data.dataSource, { offline: false })
+        .then(function(dataSource) {
+          var where = {};
+          where[data.emailColumn] = resetEmail;
+          dataSource.sendValidation({ type: type, where: where })
+          .then(function () {
+              $container.find('.pin-code-field').val("");
+              $container.find('.pin-sent-success').removeClass('hidden');
+              if ($container.find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
+                $container.find('.state[data-state=verify-code] .form-group').removeClass('has-error');
+              }
+              if (!$container.find('.resend-code').hasClass('hidden')) {
+                $container.find('.resend-code').addClass('hidden');
+              }
+          })
+          .catch(function () {
+              $container.find('.pin-sent-error').text(CONTACT_UNREACHABLE).removeClass("hidden");
+          });
+        });
     });
   }
 
