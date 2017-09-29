@@ -36,13 +36,13 @@
   <div class="fl-restore-pass" ontouchstart="">
     <div class="state start" data-state="verify-email">
       <h1>Verify your email address</h1>
-      <p>To reset your password we must verify your email address.</p>
+      <p>To reset your password you must verify your email address.</p>
       <div class="input-wrapper">
         <input type="email" class="form-control reset-email-field" placeholder="Enter your email" />
       </div>
-      <p class="text-danger reset-email-error hidden">We couldn't find your email address. Try again.</p>
+      <p class="text-danger reset-email-error hidden">Your email address cannot be found. Please try again.</p>
       <div class="btn btn-primary verify-identity">Verify email</div>
-      <div class="btn btn-link have-code hidden">I already have a pin code</div>
+      <div class="btn btn-link have-code hidden">I have a verification code</div>
       <hr>
       <div class="btn btn-secondary back-login">Login</div>
     </div>
@@ -73,16 +73,16 @@
         <input type="password" class="form-control new-password" placeholder="Enter your new password" />
         <input type="password" class="form-control confirm-password" placeholder="Confirm your new password" />
       </div>
-      <p class="text-danger reset-password-error hidden">Passwords don't match. Try again.</p>
+      <p class="text-danger reset-password-error hidden">Passwords don't match. Please try again.</p>
       <div class="btn btn-primary update-password">
-        <span>Reset</span>
+        <span>Reset password</span>
         <div class="loader">Loading...</div>
       </div>
     </div>
 
     <div class="state future" data-state="all-done">
-      <h1>Password reset</h1>
-      <p>Press <em>Login</em> to go to the login form and enter your email address and new password.</p>
+      <h1>Your password is successfully reset</h1>
+      <p>You can now login using your email address and new password.</p>
       <div class="btn btn-primary back-login">Login</div>
     </div>
   </div>

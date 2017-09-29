@@ -391,7 +391,7 @@ $('[data-login-ds-id]').each(function() {
             }
           });
         } else {
-          $container.find('.reset-password-error').html('Passwords don\'t match. Try again.');
+          $container.find('.reset-password-error').html('Passwords don\'t match. Please try again.');
           $container.find('.reset-password-error').removeClass('hidden');
 
           // Removes loading
