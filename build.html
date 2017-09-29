@@ -35,41 +35,55 @@
 
   <div class="fl-restore-pass" ontouchstart="">
     <div class="state start" data-state="verify-email">
-      <h1>Reset your password</h1>
-      <p>To reset your password we must verify that your email exists in our system</p>
+      <h1>Verify your email address</h1>
+      <p>To reset your password you must verify your email address.</p>
       <div class="input-wrapper">
         <input type="email" class="form-control reset-email-field" placeholder="Enter your email" />
       </div>
-      <p class="text-danger reset-email-error hidden">We couldn't find your email address. Try again.</p>
-      <div class="btn btn-primary verify-identity">Reset</div>
-      <div class="btn btn-link have-code hidden">I already have a pin code</div>
+      <p class="text-danger reset-email-error hidden">Your email address cannot be found. Please try again.</p>
+      <div class="btn btn-primary verify-identity">Verify email</div>
+      <div class="btn btn-link have-code hidden">I have a verification code</div>
       <hr>
       <div class="btn btn-secondary back-login">Login</div>
     </div>
 
     <div class="state future" data-state="verify-code">
       <h1>Enter verification code</h1>
-      <p>Enter the pin code that was sent to <span class="verify-user-email">hcarneiro@fliplet.com</span>.</p>
+      <p>A verification code was sent to <span class="verify-user-email"></span>.</p>
       <div class="input-wrapper">
-        <input type="text" class="form-control pin-code-field" placeholder="Enter pin code" />
+        <input type="text" class="form-control pin-code-field" placeholder="Enter verification code" />
         <span class="fa fa-angle-left back start"></span>
       </div>
-      <p class="text-danger pin-verify-error hidden">You entered the wrong code or the code expired. Try again or request a new code.</p>
+      <p class="text-danger pin-verify-error hidden">You entered the wrong code or the code expired. Please try again or request a new code.</p>
       <p class="text-danger pin-sent-error hidden">...</p>
       <div class="btn btn-primary authenticate">
         <span>Verify</span>
         <div class="loader">Loading...</div>
       </div>
-      <div class="btn btn-link resend-code hidden">Resend pin code</div>
+      <div class="btn btn-link resend-code hidden">Resend verification code</div>
       <p class="text-success pin-sent-success hidden">A new code was sent to your email.</p>
       <hr>
       <div class="btn btn-secondary back-login">Login</div>
     </div>
 
+    <div class="state future" data-state="reset-password">
+      <h1>Reset your password</h1>
+      <p>Enter your new password below.</p>
+      <div class="input-wrapper">
+        <input type="password" class="form-control new-password" placeholder="Enter your new password" />
+        <input type="password" class="form-control confirm-password" placeholder="Confirm your new password" />
+      </div>
+      <p class="text-danger reset-password-error hidden">Passwords don't match. Please try again.</p>
+      <div class="btn btn-primary update-password">
+        <span>Reset password</span>
+        <div class="loader">Loading...</div>
+      </div>
+    </div>
+
     <div class="state future" data-state="all-done">
-      <h1>Email verified</h1>
-      <p>Press <em>Continue</em> to go to your profile screen where you can set up a new password</p>
-      <div class="btn btn-primary reset-continue">Continue</div>
+      <h1>Your password is successfully reset</h1>
+      <p>You can now login using your email address and new password.</p>
+      <div class="btn btn-primary back-login">Login</div>
     </div>
   </div>
 </div>

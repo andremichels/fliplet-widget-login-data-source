@@ -11,13 +11,23 @@ var templates = {
   dataSourceEntry: template('data-source-entry')
 };
 
-var emailTemplate = $('#template-email-validation').html();
+var defaultEmailTemplate = $('#email-template-default').html();
 
 var fields = [
   'dataSource',
   'emailColumn',
-  'passColumn'
+  'passColumn',
+  'emailTemplate'
 ];
+
+var linkData = $.extend(true, {
+  action: 'screen',
+  page: 'none',
+  transition: 'slide.left',
+  options: {
+    hideAction: true
+  }
+}, data.loginAction);
 
 var loginActionProvider = Fliplet.Widget.open('com.fliplet.link', {
   // If provided, the iframe will be appended here,
@@ -25,22 +35,7 @@ var loginActionProvider = Fliplet.Widget.open('com.fliplet.link', {
   selector: '#login-link-action',
   // Also send the data I have locally, so that
   // the interface gets repopulated with the same stuff
-  data: data.loginAction,
-  // Events fired from the provider
-  onEvent: function (event, data) {
-    if (event === 'interface-validate') {
-      Fliplet.Widget.toggleSaveButton(data.isValid === true);
-    }
-  }
-});
-
-var resetActionProvider = Fliplet.Widget.open('com.fliplet.link', {
-  // If provided, the iframe will be appended here,
-  // otherwise will be displayed as a full-size iframe overlay
-  selector: '#reset-link-action',
-  // Also send the data I have locally, so that
-  // the interface gets repopulated with the same stuff
-  data: data.resetAction,
+  data: linkData,
   // Events fired from the provider
   onEvent: function (event, data) {
     if (event === 'interface-validate') {
@@ -68,8 +63,11 @@ tinymce.init({
       if ("emailTemplate" in data && data.emailTemplate !== "") {
         tinymce.get('validationEmail').setContent(data.emailTemplate);
       } else {
-        tinymce.get('validationEmail').setContent(emailTemplate);
+        tinymce.get('validationEmail').setContent(defaultEmailTemplate);
       }
+    });
+    editor.on('keyup paste', function(e) {
+      data.emailTemplate = editor.getContent();
     });
   }
 });
@@ -83,17 +81,11 @@ Fliplet.Widget.onSaveRequest(function () {
 $('form').submit(function (event) {
   event.preventDefault();
   loginActionProvider.forwardSaveRequest();
-  resetActionProvider.forwardSaveRequest();
 });
 
 // 3. Fired when the provider has finished
 loginActionProvider.then(function (result) {
   data.loginAction = result.data;
-  save(true);
-});
-
-resetActionProvider.then(function (result) {
-  data.resetAction = result.data;
   save(true);
 });
 
@@ -108,16 +100,38 @@ function save(notifyComplete) {
     data[fieldId] = $('#' + fieldId).val();
   });
 
-  data.emailTemplate = tinymce.get('validationEmail').getContent() || emailTemplate;
-
-  Fliplet.Widget.save(data).then(function () {
-    if (notifyComplete) {
-      Fliplet.Widget.complete();
-      window.location.reload();
-    } else {
-      Fliplet.Studio.emit('reload-widget-instance', widgetId);
+  
+  
+  var definition = currentDataSource.definition || {};
+  var validation = {
+    email: {
+      domain: false,
+      expire: "60",
+      domains: [],
+      template: {
+        to: [],
+        html: data.emailTemplate || defaultEmailTemplate,
+        subject: "Validate your email address"
+      },
+      toColumn: data.emailColumn,
+      matchColumn: data.emailColumn
     }
-  });
+  };
+  definition.validation = validation;
+
+  // Update data source definitions
+  var options = { id: data.dataSource, definition: definition };
+  Fliplet.DataSources.update(options)
+    .then(function() {
+      Fliplet.Widget.save(data).then(function () {
+        if (notifyComplete) {
+          Fliplet.Widget.complete();
+          window.location.reload();
+        } else {
+          Fliplet.Studio.emit('reload-widget-instance', widgetId);
+        }
+      });
+    })
 }
 
 Fliplet.Widget.emit(validInputEventName, {
@@ -158,6 +172,7 @@ $('#dataSource').on('change', function onDataSourceListChange() {
 
   allDataSources.forEach(function(dataSource){
     if(dataSource.id == selectedValue && typeof dataSource.columns !== "undefined") {
+      currentDataSource = dataSource;
       dataSource.columns.forEach(renderDataSourceColumn);
     }
   });
@@ -173,7 +188,7 @@ $('#emailColumn, #passColumn').on('change', function() {
   });
 });
 
-$('#allow_reset').on('change', $.debounce(function() {
+$('#allow_reset').on('change', function() {
 
   if ( $(this).is(':checked') ) {
   	$('.reset-pass-redirect').removeClass('hidden');
@@ -188,7 +203,7 @@ $('#allow_reset').on('change', $.debounce(function() {
   }
 
   initialLoadingDone = true;
-}, 0));
+});
 
 $('#help_tip').on('click', function() {
   alert("During beta, please use live chat and let us know what you need help with.");

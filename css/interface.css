@@ -123,7 +123,6 @@ h2 small {
 }
 
 label {
-    font-weight: normal;
     color: #14505e;
 }
 
@@ -180,7 +179,6 @@ label {
     height: 44px;
     top: -1px;
     right: -1px;
-    background-color: #cbcfd1;
     text-align: center;
     line-height: 44px;
     font-size: 18px;
@@ -269,6 +267,10 @@ label {
     border: 0;
     border-bottom: 4px solid #00abd2;
     background: none;
+}
+
+.tab-pane-content .form-horizontal {
+    padding-top: 15px;
 }
 /* @MEDIA QUERY */
 @media screen and (min-width: 640px) {
