@@ -398,6 +398,8 @@ $('[data-login-ds-id]').each(function() {
           $(this).removeClass('loading');
           $(this).find('span').removeClass('hidden');
           $(this).find('.loader').removeClass('show');
+
+          calculateElHeight($container.find('.state[data-state=reset-password]'));
         }
       } else {
         $container.find('.reset-password-error').html('Enter a new password and confirm. Try again.');
@@ -407,6 +409,8 @@ $('[data-login-ds-id]').each(function() {
         $(this).removeClass('loading');
         $(this).find('span').removeClass('hidden');
         $(this).find('.loader').removeClass('show');
+
+        calculateElHeight($container.find('.state[data-state=reset-password]'));
       }
     });
 
