@@ -466,12 +466,11 @@ $('[data-login-ds-id]').each(function() {
 
   }
 
-  if (Fliplet.Env.get('platform') === 'web') {
+  Fliplet().then(function () {
+    initEmailValidation();
 
-    $(document).ready(initEmailValidation);
-
-    $container.on("fliplet_page_reloaded", initEmailValidation);
-  } else {
-    document.addEventListener("deviceready", initEmailValidation);
-  }
+    if (Fliplet.Env.is('web')) {
+      $container.on("fliplet_page_reloaded", initEmailValidation);
+    }
+  });
 });
