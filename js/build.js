@@ -334,7 +334,7 @@ $('[data-login-ds-id]').each(function() {
             if (session.entries && session.entries.dataSource) {
               entryId = 'session'; // this works because you can use it as an ID on the backend
               entry = session.entries.dataSource;
-              return Fliplet.DataSources.connect(data.dataSource).then(function(dataSource) {
+              return Fliplet.DataSources.connect(data.dataSource, { offline: false }).then(function(dataSource) {
                 var options = {
                   type: 'update',
                   where: {},
@@ -353,7 +353,7 @@ $('[data-login-ds-id]').each(function() {
                     calculateElHeight($container.find('.state[data-state=all-done]'));
                     $container.find('.state[data-state=all-done]').removeClass('future').addClass('present');
                   })
-                  .catch(function onPasswordUpdateError () {
+                  .catch(function onPasswordUpdateError (error) {
                     // Query failed due to some datasource missconfiguration or access denied
                     _this.removeClass('loading');
                     _this.find('span').removeClass('hidden');
