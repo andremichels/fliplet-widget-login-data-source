@@ -102,7 +102,7 @@ function save(notifyComplete) {
 
   
   
-  var definition = currentDataSource.definition || {};
+  var definition = currentDataSource && currentDataSource.definition || {};
   var validation = {
     email: {
       domain: false,
