@@ -111,9 +111,11 @@ $('[data-login-ds-id]').each(function() {
           userDataPV.entry = entry;
           userDataPV.userLogged = true;
           // Set PV to be used by Chat
-          Fliplet.App.Storage.set('fl-chat-source-id', entry.dataSourceId);
-          Fliplet.App.Storage.set('fl-chat-auth-email', profileEmail);
-          Fliplet.App.Storage.set('fl-login-data-source', entry);
+          Fliplet.App.Storage.set({
+            'fl-chat-source-id': entry.dataSourceId,
+            'fl-chat-auth-email': profileEmail,
+            'fl-login-data-source': entry
+          });
           Fliplet.Profile.set('email', profileEmail);
           Fliplet.Security.Storage.update().then(function() {
 
