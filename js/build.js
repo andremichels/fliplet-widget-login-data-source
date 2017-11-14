@@ -36,7 +36,7 @@ $('[data-login-ds-id]').each(function() {
       // Check if user is already verified
       Fliplet.App.Storage.get('fl-login-data-source')
         .then(function(value) {
-          if (!value || !data.loginAction) {
+          if (!value || !data.loginAction || Fliplet.Env.get('disableSecurity')) {
             return;
           }
           setTimeout(function() {
@@ -123,7 +123,7 @@ $('[data-login-ds-id]').each(function() {
             _this.find('span').removeClass('hidden');
             _this.find('.loader').removeClass('show');
 
-            if (typeof data.loginAction !== "undefined") {
+            if (typeof data.loginAction !== "undefined" && !Fliplet.Env.get('disableSecurity')) {
               Fliplet.Navigate.to(data.loginAction);
             }
 
