@@ -471,6 +471,11 @@ $('[data-login-ds-id]').each(function() {
   Fliplet().then(function () {
     initEmailValidation();
 
+    if (Fliplet.Env.get('interact')) {
+      // Disables password fields in edit mode to avoid password autofill
+      $('input[type="password"]').prop('disabled', true);
+    }
+
     if (Fliplet.Env.is('web')) {
       $container.on("fliplet_page_reloaded", initEmailValidation);
     }
