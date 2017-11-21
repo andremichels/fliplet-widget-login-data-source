@@ -34,15 +34,16 @@ $('[data-login-ds-id]').each(function() {
 
       // New logic to redirect
       // Check if user is already verified
-      Fliplet.App.Storage.get('fl-login-data-source')
-        .then(function(value) {
-          if (!value || !data.loginAction || Fliplet.Env.get('disableSecurity')) {
-            return;
-          }
-          setTimeout(function() {
-            Fliplet.Navigate.to(data.loginAction);
-          }, 1000);
-        });
+      if (!Fliplet.Env.get('disableSecurity')) {
+        Fliplet.User.getCachedSession()
+          .then(function(session) {
+            if (session && session.server && session.server.passports && session.server.passports.dataSource) {
+              setTimeout(function() {
+                Fliplet.Navigate.to(data.action);
+              }, 1000);
+            }
+          });
+      }
     });
   }
 
