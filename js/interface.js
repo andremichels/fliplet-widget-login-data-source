@@ -4,6 +4,7 @@ var data = Fliplet.Widget.getData(widgetId) || {};
 var organizationId = Fliplet.Env.get('organizationId');
 var validInputEventName = 'interface-validate';
 
+var $dataSource = $('#dataSource');
 var allDataSources;
 var initialLoadingDone = false;
 
@@ -145,7 +146,7 @@ Fliplet.DataSources.get({ organizationId: organizationId }).then(function (dataS
 }).then(initialiseData);
 
 function renderDataSource(dataSource){
-  $('#dataSource').append(templates.dataSourceEntry(dataSource));
+  $dataSource.append(templates.dataSourceEntry(dataSource));
 }
 
 function renderDataSourceColumn(dataSourceColumn){
@@ -153,7 +154,35 @@ function renderDataSourceColumn(dataSourceColumn){
   $('#passColumn').append('<option value="'+dataSourceColumn+'">'+dataSourceColumn+'</option>');
 }
 
-$('#dataSource').on('change', function onDataSourceListChange() {
+function createDataSource() {
+  event.preventDefault();
+  var name = prompt('Please type a name for your data source:');
+
+  if (!name) {
+    return;
+  }
+
+  Fliplet.DataSources.create({
+    name: name,
+    organizationId: Fliplet.Env.get('organizationId')
+  }).then(function(ds) {
+    allDataSources.push(ds);
+    $dataSource.append('<option value="' + ds.id + '">' + ds.name + '</option>');
+    $dataSource.val(ds.id).trigger('change');
+  });
+}
+
+function manageAppData() {
+  console.log('TODO');
+  var dataSourceId = $dataSource.val();
+  // @TODO:
+  // Open overlay to data sources provider with ID
+}
+
+$('.create-data-source').on('click', createDataSource);
+$('#manage-data').on('click', manageAppData);
+
+$dataSource.on('change', function onDataSourceListChange() {
   var selectedOption = $(this).find("option:selected"),
       selectedText = selectedOption.text(),
       selectedValue = selectedOption.val();
@@ -163,9 +192,11 @@ $('#dataSource').on('change', function onDataSourceListChange() {
   $('#passColumn option:gt(0)').remove();
 
   if ( $(this).val() !== "none" ) {
+    $('#manage-data').removeClass('hidden');
     $('#select-email-field').removeClass('hidden');
     $('#select-pass-field').removeClass('hidden');
   } else {
+    $('#manage-data').addClass('hidden');
     $('#select-email-field').addClass('hidden');
     $('#select-pass-field').addClass('hidden');
   }
