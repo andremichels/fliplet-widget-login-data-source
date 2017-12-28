@@ -141,9 +141,22 @@ Fliplet.Widget.emit(validInputEventName, {
 
 Fliplet.DataSources.get({ organizationId: organizationId }).then(function (dataSources) {
   allDataSources = dataSources || [];
+  $dataSource.html('<option value="">-- Select a data source --</option>');
   dataSources.forEach(renderDataSource);
   return Promise.resolve();
 }).then(initialiseData);
+
+function reloadDataSource(dataSourceId) {
+  Fliplet.DataSources.get({ organizationId: organizationId }, {cache: false}).then(function (dataSources) {
+    allDataSources = dataSources || [];
+    $dataSource.html('<option value="">-- Select a data source --</option>');
+    dataSources.forEach(renderDataSource);
+    return Promise.resolve();
+  }).then(function() {
+    $dataSource.val(dataSourceId);
+    $dataSource.trigger('change');
+  });
+}
 
 function renderDataSource(dataSource){
   $dataSource.append(templates.dataSourceEntry(dataSource));
@@ -173,11 +186,23 @@ function createDataSource() {
 }
 
 function manageAppData() {
-  console.log('TODO');
   var dataSourceId = $dataSource.val();
-  // @TODO:
-  // Open overlay to data sources provider with ID
+  Fliplet.Studio.emit('overlay', {
+    name: 'widget',
+    options: {
+      size: 'large',
+      package: 'com.fliplet.data-sources',
+      title: 'Edit Data Sources',
+      data: { dataSourceId: dataSourceId }
+    }
+  });
 }
+
+Fliplet.Studio.onMessage(function(event) {
+  if (event.data && event.data.event === 'overlay-close') {
+    reloadDataSource(event.data.data.dataSourceId);
+  }
+});
 
 $('.create-data-source').on('click', createDataSource);
 $('#manage-data').on('click', manageAppData);
@@ -205,6 +230,8 @@ $dataSource.on('change', function onDataSourceListChange() {
     if(dataSource.id == selectedValue && typeof dataSource.columns !== "undefined") {
       currentDataSource = dataSource;
       dataSource.columns.forEach(renderDataSourceColumn);
+      $('#emailColumn').trigger('change');
+      $('#passColumn').trigger('change');
     }
   });
 });
