@@ -4,6 +4,7 @@ var data = Fliplet.Widget.getData(widgetId) || {};
 var organizationId = Fliplet.Env.get('organizationId');
 var validInputEventName = 'interface-validate';
 
+var $dataSource = $('#dataSource');
 var allDataSources;
 var initialLoadingDone = false;
 
@@ -140,12 +141,25 @@ Fliplet.Widget.emit(validInputEventName, {
 
 Fliplet.DataSources.get({ organizationId: organizationId }).then(function (dataSources) {
   allDataSources = dataSources || [];
+  $dataSource.html('<option value="">-- Select a data source --</option>');
   dataSources.forEach(renderDataSource);
   return Promise.resolve();
 }).then(initialiseData);
 
+function reloadDataSource(dataSourceId) {
+  Fliplet.DataSources.get({ organizationId: organizationId }, {cache: false}).then(function (dataSources) {
+    allDataSources = dataSources || [];
+    $dataSource.html('<option value="">-- Select a data source --</option>');
+    dataSources.forEach(renderDataSource);
+    return Promise.resolve();
+  }).then(function() {
+    $dataSource.val(dataSourceId);
+    $dataSource.trigger('change');
+  });
+}
+
 function renderDataSource(dataSource){
-  $('#dataSource').append(templates.dataSourceEntry(dataSource));
+  $dataSource.append(templates.dataSourceEntry(dataSource));
 }
 
 function renderDataSourceColumn(dataSourceColumn){
@@ -153,7 +167,47 @@ function renderDataSourceColumn(dataSourceColumn){
   $('#passColumn').append('<option value="'+dataSourceColumn+'">'+dataSourceColumn+'</option>');
 }
 
-$('#dataSource').on('change', function onDataSourceListChange() {
+function createDataSource() {
+  event.preventDefault();
+  var name = prompt('Please type a name for your data source:');
+
+  if (!name) {
+    return;
+  }
+
+  Fliplet.DataSources.create({
+    name: name,
+    organizationId: Fliplet.Env.get('organizationId')
+  }).then(function(ds) {
+    allDataSources.push(ds);
+    $dataSource.append('<option value="' + ds.id + '">' + ds.name + '</option>');
+    $dataSource.val(ds.id).trigger('change');
+  });
+}
+
+function manageAppData() {
+  var dataSourceId = $dataSource.val();
+  Fliplet.Studio.emit('overlay', {
+    name: 'widget',
+    options: {
+      size: 'large',
+      package: 'com.fliplet.data-sources',
+      title: 'Edit Data Sources',
+      data: { dataSourceId: dataSourceId }
+    }
+  });
+}
+
+Fliplet.Studio.onMessage(function(event) {
+  if (event.data && event.data.event === 'overlay-close') {
+    reloadDataSource(event.data.data.dataSourceId);
+  }
+});
+
+$('.create-data-source').on('click', createDataSource);
+$('#manage-data').on('click', manageAppData);
+
+$dataSource.on('change', function onDataSourceListChange() {
   var selectedOption = $(this).find("option:selected"),
       selectedText = selectedOption.text(),
       selectedValue = selectedOption.val();
@@ -163,9 +217,11 @@ $('#dataSource').on('change', function onDataSourceListChange() {
   $('#passColumn option:gt(0)').remove();
 
   if ( $(this).val() !== "none" ) {
+    $('#manage-data').removeClass('hidden');
     $('#select-email-field').removeClass('hidden');
     $('#select-pass-field').removeClass('hidden');
   } else {
+    $('#manage-data').addClass('hidden');
     $('#select-email-field').addClass('hidden');
     $('#select-pass-field').addClass('hidden');
   }
@@ -174,6 +230,8 @@ $('#dataSource').on('change', function onDataSourceListChange() {
     if(dataSource.id == selectedValue && typeof dataSource.columns !== "undefined") {
       currentDataSource = dataSource;
       dataSource.columns.forEach(renderDataSourceColumn);
+      $('#emailColumn').trigger('change');
+      $('#passColumn').trigger('change');
     }
   });
 });
