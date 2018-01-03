@@ -40,10 +40,10 @@ $('[data-login-ds-id]').each(function() {
           .then(function(session) {
             if (session && session.accounts && session.accounts.dataSource) {
               var verifiedAccounts = session.accounts.dataSource.filter(function (dataSourceAccount) {
-                return dataSourceAccount.id === APP_VALIDATION_DATA_DIRECTORY_ID;
+                return dataSourceAccount.dataSourceId === APP_VALIDATION_DATA_DIRECTORY_ID;
               });
 
-              if (verifiedAccounts.lenght) {
+              if (verifiedAccounts.length) {
                 setTimeout(function() {
                   Fliplet.Navigate.to(data.action);
                 }, 1000);
