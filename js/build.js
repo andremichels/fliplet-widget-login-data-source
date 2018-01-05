@@ -2,6 +2,7 @@ $('[data-login-ds-id]').each(function() {
   var _this = this;
   var $container = $(this);
   var widgetId = $container.attr('data-login-ds-id');
+  var containerSelector = '[data-login-ds-id="'+widgetId+'"]';
   var widgetUuid = $container.attr('data-login-ds-uuid');
   var data = Fliplet.Widget.getData(widgetId);
   var dataSourceEntry; // Data source entry after user verify email
@@ -22,7 +23,7 @@ $('[data-login-ds-id]').each(function() {
     ORG_NAME = Fliplet.Env.get('organizationName');
 
   if (Fliplet.Navigate.query.error) {
-    $container.find('.login-error').html(Fliplet.Navigate.query.error).removeClass('hidden');
+    $(containerSelector).find('.login-error').html(Fliplet.Navigate.query.error).removeClass('hidden');
   }
 
   function initEmailValidation() {
@@ -34,15 +35,16 @@ $('[data-login-ds-id]').each(function() {
 
       // New logic to redirect
       // Check if user is already verified
-      Fliplet.App.Storage.get('fl-login-data-source')
-        .then(function(value) {
-          if (!value || !data.loginAction) {
-            return;
-          }
-          setTimeout(function() {
-            Fliplet.Navigate.to(data.loginAction);
-          }, 1000);
-        });
+      if (!Fliplet.Env.get('disableSecurity')) {
+        Fliplet.User.getCachedSession()
+          .then(function(session) {
+            if (session && session.server && session.server.passports && session.server.passports.dataSource) {
+              setTimeout(function() {
+                Fliplet.Navigate.to(data.action);
+              }, 1000);
+            }
+          });
+      }
     });
   }
 
@@ -89,12 +91,12 @@ $('[data-login-ds-id]').each(function() {
 
   function attachEventListeners() {
 
-    $container.find('.btn-login').on('click', function() {
+    $(containerSelector).on('click', '.btn-login', function() {
       var _this = $(this);
       _this.parents('.form-btns').find('.login-error').addClass('hidden');
 
-      window.profileEmail = $container.find('input.profile_email').val().toLowerCase(); // GET EMAIL VALUE
-      window.profilePassword = $container.find('input.profile_password').val();
+      window.profileEmail = $(containerSelector).find('input.profile_email').val().toLowerCase(); // GET EMAIL VALUE
+      window.profilePassword = $(containerSelector).find('input.profile_password').val();
 
       // Triggers loading
       $(this).addClass('loading');
@@ -123,7 +125,7 @@ $('[data-login-ds-id]').each(function() {
             _this.find('span').removeClass('hidden');
             _this.find('.loader').removeClass('show');
 
-            if (typeof data.loginAction !== "undefined") {
+            if (typeof data.loginAction !== "undefined" && !Fliplet.Env.get('disableSecurity')) {
               Fliplet.Navigate.to(data.loginAction);
             }
 
@@ -150,39 +152,37 @@ $('[data-login-ds-id]').each(function() {
     // EVENT LISTENER FOR FORGET PASSWORD RESET
     // Just switches views Login to Email verification
     // Leave as it is
-    $container.find('.btn-forget-pass').on('click', function() {
-      $container.find('.fl-login-holder').fadeOut(100);
-      setTimeout(function() {
-        $container.find('.fl-restore-pass').fadeIn(250);
-        calculateElHeight($container.find('.state[data-state=verify-email]'));
-      }, 100);
+    $(containerSelector).on('click', '.btn-forget-pass', function() {
+      $(containerSelector).find('.fl-login-holder').fadeOut(100, function() {
+        $(containerSelector).find('.fl-restore-pass').fadeIn(300);
+        calculateElHeight($(containerSelector).find('.state[data-state=verify-email]'));
+      });
     });
 
 
-    $container.find('.back-login').on('click', function() {
-      $container.find('.fl-restore-pass').fadeOut(100);
-      setTimeout(function() {
-        $container.find('.fl-login-holder').fadeIn(250);
+    $(containerSelector).on('click', '.back-login', function() {
+      $(containerSelector).find('.fl-restore-pass').fadeOut(100, function() {
+        $(containerSelector).find('.fl-login-holder').fadeIn(250);
 
         // Reset states of email verification
-        $container.find('.reset-email-error').addClass('hidden');
-        $container.find('.pin-verify-error').addClass('hidden');
-        $container.find('.pin-sent-error').addClass('hidden');
-        $container.find('.state').removeClass('present past').addClass('future');
-        $container.find('.state[data-state=verify-email]').removeClass('future').addClass('start');
-      }, 100);
+        $(containerSelector).find('.reset-email-error').addClass('hidden');
+        $(containerSelector).find('.pin-verify-error').addClass('hidden');
+        $(containerSelector).find('.pin-sent-error').addClass('hidden');
+        $(containerSelector).find('.state').removeClass('present past').addClass('future');
+        $(containerSelector).find('.state[data-state=verify-email]').removeClass('future').addClass('start');
+      });
     });
 
-    $container.find('.verify-identity').on('click', function(event) {
+    $(containerSelector).on('click', '.verify-identity', function(event) {
       var _this = $(this);
       _this.addClass("disabled");
 
-      window.resetEmail = $container.find('input.reset-email-field').val().toLowerCase(); // Get email for reset
+      window.resetEmail = $(containerSelector).find('input.reset-email-field').val().toLowerCase(); // Get email for reset
 
-      $container.find('.reset-email-error').addClass('hidden');
+      $(containerSelector).find('.reset-email-error').addClass('hidden');
       // EMAIL FOUND ON DATA SOURCE
-      if ($container.find('.state[data-state=verify-email] .form-group').hasClass('has-error')) {
-        $container.find('.state[data-state=verify-email] .form-group').removeClass('has-error');
+      if ($(containerSelector).find('.state[data-state=verify-email] .form-group').hasClass('has-error')) {
+        $(containerSelector).find('.state[data-state=verify-email] .form-group').removeClass('has-error');
       }
 
       // VALIDATE EMAIL
@@ -191,76 +191,76 @@ $('[data-login-ds-id]').each(function() {
         var where = {};
         where[DATA_DIRECTORY_EMAIL_COLUMN] = resetEmail;
         resetFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, where, function(entry) {
-          if ($container.find('.state[data-state=verify-email] .form-group').hasClass('has-error')) {
-            $container.find('.state[data-state=verify-email] .form-group').removeClass('has-error');
+          if ($(containerSelector).find('.state[data-state=verify-email] .form-group').hasClass('has-error')) {
+            $(containerSelector).find('.state[data-state=verify-email] .form-group').removeClass('has-error');
           }
-          $container.find('.state[data-state=verify-email]').removeClass('present').addClass('past');
-          $container.find('.verify-user-email').text(resetEmail); // UPDATES TEXT WITH EMAIL
+          $(containerSelector).find('.state[data-state=verify-email]').removeClass('present').addClass('past');
+          $(containerSelector).find('.verify-user-email').text(resetEmail); // UPDATES TEXT WITH EMAIL
           _this.removeClass("disabled");
-          calculateElHeight($container.find('.state[data-state=verify-code]'));
-          $container.find('.state[data-state=verify-code]').removeClass('future').addClass('present');
+          calculateElHeight($(containerSelector).find('.state[data-state=verify-code]'));
+          $(containerSelector).find('.state[data-state=verify-code]').removeClass('future').addClass('present');
           
         }, function(error) {
           // EMAIL NOT FOUND ON DATA SOURCE
           _this.removeClass("disabled");
-          $container.find('.reset-email-error').html("We couldn't find your email in our system. Please try again.").removeClass('hidden');
-          $container.find('.state[data-state=verify-email] .form-group').addClass('has-error');
-          calculateElHeight($container.find('.state[data-state=verify-email]'));
+          $(containerSelector).find('.reset-email-error').html("We couldn't find your email in our system. Please try again.").removeClass('hidden');
+          $(containerSelector).find('.state[data-state=verify-email] .form-group').addClass('has-error');
+          calculateElHeight($(containerSelector).find('.state[data-state=verify-email]'));
         });
 
       } else {
         // INVALID EMAIL
         _this.removeClass("disabled");
-        $container.find('.reset-email-error').html("Please enter a valid email address and try again.").removeClass('hidden');
-        $container.find('.state[data-state=verify-email] .form-group').addClass('has-error');
-        calculateElHeight($container.find('.state[data-state=verify-email]'));
+        $(containerSelector).find('.reset-email-error').html("Please enter a valid email address and try again.").removeClass('hidden');
+        $(containerSelector).find('.state[data-state=verify-email] .form-group').addClass('has-error');
+        calculateElHeight($(containerSelector).find('.state[data-state=verify-email]'));
       }
     });
 
-    $container.find('.back.start').on('click', function() {
-      $container.find('.state.present').removeClass('present').addClass('future');
+    $(containerSelector).on('click', '.back.start', function() {
+      $(containerSelector).find('.state.present').removeClass('present').addClass('future');
 
-      $container.find('.reset-email-field').val(""); // RESETS EMAIL VALUE
-      $container.find('.pin-code-field').val(""); // RESETS PIN
+      $(containerSelector).find('.reset-email-field').val(""); // RESETS EMAIL VALUE
+      $(containerSelector).find('.pin-code-field').val(""); // RESETS PIN
 
       // REMOVES ERROR MESSAGE ON CURRENT STATE IF THERE IS ONE
-      if ($container.find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
-        $container.find('.state[data-state=verify-code] .form-group').removeClass('has-error');
+      if ($(containerSelector).find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
+        $(containerSelector).find('.state[data-state=verify-code] .form-group').removeClass('has-error');
       }
 
       //check the validation current state.
       if (userDataPV.code !== "" && userDataPV.code_generated_at > Date.now() - (CODE_VALID * 60 * 1000)) {
-        $container.find('.have-code').removeClass('hidden');
+        $(containerSelector).find('.have-code').removeClass('hidden');
       }
-      //$container.find('.verify-code').html("Verify").removeClass("disabled");
-      $container.find('.authenticate').removeClass('loading');
-      $container.find('.authenticate').find('span').removeClass('hidden');
-      $container.find('.authenticate').find('.loader').removeClass('show');
+      //$(containerSelector).find('.verify-code').html("Verify").removeClass("disabled");
+      $(containerSelector).find('.authenticate').removeClass('loading');
+      $(containerSelector).find('.authenticate').find('span').removeClass('hidden');
+      $(containerSelector).find('.authenticate').find('.loader').removeClass('show');
 
-      calculateElHeight($container.find('.state[data-state=verify-email]'));
-      $container.find('.state[data-state=verify-email]').removeClass('past').addClass('present');
+      calculateElHeight($(containerSelector).find('.state[data-state=verify-email]'));
+      $(containerSelector).find('.state[data-state=verify-email]').removeClass('past').addClass('present');
     });
 
-    $container.find('.have-code').on('click', function() {
+    $(containerSelector).on('click', '.have-code', function() {
       // TRANSITION
-      $container.find('.state.present').removeClass('present').addClass('past');
-      $container.find('.verify-user-email').text(userDataPV.email); // UPDATES TEXT WITH EMAIL
+      $(containerSelector).find('.state.present').removeClass('present').addClass('past');
+      $(containerSelector).find('.verify-user-email').text(userDataPV.email); // UPDATES TEXT WITH EMAIL
 
-      calculateElHeight($container.find('.state[data-state=verify-code]'));
-      $container.find('.state[data-state=verify-code]').removeClass('future').addClass('present');
+      calculateElHeight($(containerSelector).find('.state[data-state=verify-code]'));
+      $(containerSelector).find('.state[data-state=verify-code]').removeClass('future').addClass('present');
     });
 
-    $container.find('.authenticate').on('click', function() {
+    $(containerSelector).on('click', '.authenticate', function() {
       var _this = $(this);
 
-      $container.find('.pin-verify-error').addClass('hidden');
-      $container.find('.pin-sent-error').addClass('hidden');
+      $(containerSelector).find('.pin-verify-error').addClass('hidden');
+      $(containerSelector).find('.pin-sent-error').addClass('hidden');
       // Simulates loading
       $(this).addClass('loading');
       $(this).find('span').addClass('hidden');
       $(this).find('.loader').addClass('show');
 
-      var code = $container.find('.pin-code-field').val();
+      var code = $(containerSelector).find('.pin-code-field').val();
       Fliplet.DataSources.connect(data.dataSource, { offline: false })
         .then(function(dataSource) {
           var where = { code: code };
@@ -280,8 +280,8 @@ $('[data-login-ds-id]').each(function() {
                   ]);
                 })
                 .then(function() {
-                  if ($container.find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
-                    $container.find('.state[data-state=verify-code] .form-group').removeClass('has-error');
+                  if ($(containerSelector).find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
+                    $(containerSelector).find('.state[data-state=verify-code] .form-group').removeClass('has-error');
                   }
         
                   userDataPV.resetVerified = true;
@@ -292,9 +292,9 @@ $('[data-login-ds-id]').each(function() {
                     _this.find('span').removeClass('hidden');
                     _this.find('.loader').removeClass('show');
         
-                    $container.find('.state.present').removeClass('present').addClass('past');
-                    calculateElHeight($container.find('.state[data-state=reset-password]'));
-                    $container.find('.state[data-state=reset-password]').removeClass('future').addClass('present');
+                    $(containerSelector).find('.state.present').removeClass('present').addClass('past');
+                    calculateElHeight($(containerSelector).find('.state[data-state=reset-password]'));
+                    $(containerSelector).find('.state[data-state=reset-password]').removeClass('future').addClass('present');
         
                     // Analytics - Info Event
                     Fliplet.Analytics.info({
@@ -304,31 +304,31 @@ $('[data-login-ds-id]').each(function() {
                   });
                 })
                 .catch(function(error) {
-                  $container.find('.state[data-state=verify-code] .form-group').addClass('has-error');
-                  $container.find('.resend-code').removeClass('hidden');
+                  $(containerSelector).find('.state[data-state=verify-code] .form-group').addClass('has-error');
+                  $(containerSelector).find('.resend-code').removeClass('hidden');
                   _this.removeClass('loading');
                   _this.find('span').removeClass('hidden');
                   _this.find('.loader').removeClass('show');
-                  $container.find('.pin-verify-error').removeClass('hidden');
-                  calculateElHeight($container.find('.state[data-state=verify-code]'));
+                  $(containerSelector).find('.pin-verify-error').removeClass('hidden');
+                  calculateElHeight($(containerSelector).find('.state[data-state=verify-code]'));
                 });
             })
         });  
     });
 
     // UPDATE PASSWORD
-    $container.find('.update-password').on('click', function() {
+    $(containerSelector).on('click', '.update-password', function() {
       var _this = $(this);
 
-      $container.find('.reset-password-error').addClass('hidden');
+      $(containerSelector).find('.reset-password-error').addClass('hidden');
 
       // Simulates loading
       $(this).addClass('loading');
       $(this).find('span').addClass('hidden');
       $(this).find('.loader').addClass('show');
 
-      var newPassword = $container.find('.new-password').val();
-      var confirmPassword = $container.find('.confirm-password').val();
+      var newPassword = $(containerSelector).find('.new-password').val();
+      var confirmPassword = $(containerSelector).find('.confirm-password').val();
 
       if (newPassword || confirmPassword) {
         if (newPassword === confirmPassword) {
@@ -351,9 +351,9 @@ $('[data-login-ds-id]').each(function() {
                     _this.find('span').removeClass('hidden');
                     _this.find('.loader').removeClass('show');
           
-                    $container.find('.state.present').removeClass('present').addClass('past');
-                    calculateElHeight($container.find('.state[data-state=all-done]'));
-                    $container.find('.state[data-state=all-done]').removeClass('future').addClass('present');
+                    $(containerSelector).find('.state.present').removeClass('present').addClass('past');
+                    calculateElHeight($(containerSelector).find('.state[data-state=all-done]'));
+                    $(containerSelector).find('.state[data-state=all-done]').removeClass('future').addClass('present');
                   })
                   .catch(function onPasswordUpdateError (error) {
                     // Query failed due to some datasource missconfiguration or access denied
@@ -361,8 +361,8 @@ $('[data-login-ds-id]').each(function() {
                     _this.find('span').removeClass('hidden');
                     _this.find('.loader').removeClass('show');
   
-                    $container.find('.reset-password-error').html('Something went wrong! Try again.');
-                    $container.find('.reset-password-error').removeClass('hidden');
+                    $(containerSelector).find('.reset-password-error').html('Something went wrong! Try again.');
+                    $(containerSelector).find('.reset-password-error').removeClass('hidden');
                   });
               });
             } else {
@@ -371,63 +371,63 @@ $('[data-login-ds-id]').each(function() {
               _this.find('span').removeClass('hidden');
               _this.find('.loader').removeClass('show');
   
-              $container.find('.state.present').removeClass('present').addClass('future');
+              $(containerSelector).find('.state.present').removeClass('present').addClass('future');
   
-              $container.find('.reset-email-field').val(""); // RESETS EMAIL VALUE
-              $container.find('.pin-code-field').val(""); // RESETS PIN
+              $(containerSelector).find('.reset-email-field').val(""); // RESETS EMAIL VALUE
+              $(containerSelector).find('.pin-code-field').val(""); // RESETS PIN
   
               //check the validation current state.
               if (userDataPV.code !== "" && userDataPV.code_generated_at > Date.now() - (CODE_VALID * 60 * 1000)) {
-                $container.find('.have-code').removeClass('hidden');
+                $(containerSelector).find('.have-code').removeClass('hidden');
               }
   
-              $container.find('.authenticate').removeClass('loading');
-              $container.find('.authenticate').find('span').removeClass('hidden');
-              $container.find('.authenticate').find('.loader').removeClass('show');
+              $(containerSelector).find('.authenticate').removeClass('loading');
+              $(containerSelector).find('.authenticate').find('span').removeClass('hidden');
+              $(containerSelector).find('.authenticate').find('.loader').removeClass('show');
   
-              $container.find('.reset-email-error').html("You need to verify your email first.").removeClass('hidden');
-              $container.find('.state[data-state=verify-email] .form-group').addClass('has-error');
+              $(containerSelector).find('.reset-email-error').html("You need to verify your email first.").removeClass('hidden');
+              $(containerSelector).find('.state[data-state=verify-email] .form-group').addClass('has-error');
   
-              calculateElHeight($container.find('.state[data-state=verify-email]'));
-              $container.find('.state[data-state=verify-email]').removeClass('past').addClass('present');
+              calculateElHeight($(containerSelector).find('.state[data-state=verify-email]'));
+              $(containerSelector).find('.state[data-state=verify-email]').removeClass('past').addClass('present');
             }
           });
         } else {
-          $container.find('.reset-password-error').html('Passwords don\'t match. Please try again.');
-          $container.find('.reset-password-error').removeClass('hidden');
+          $(containerSelector).find('.reset-password-error').html('Passwords don\'t match. Please try again.');
+          $(containerSelector).find('.reset-password-error').removeClass('hidden');
 
           // Removes loading
           $(this).removeClass('loading');
           $(this).find('span').removeClass('hidden');
           $(this).find('.loader').removeClass('show');
 
-          calculateElHeight($container.find('.state[data-state=reset-password]'));
+          calculateElHeight($(containerSelector).find('.state[data-state=reset-password]'));
         }
       } else {
-        $container.find('.reset-password-error').html('Enter a new password and confirm. Try again.');
-        $container.find('.reset-password-error').removeClass('hidden');
+        $(containerSelector).find('.reset-password-error').html('Enter a new password and confirm. Try again.');
+        $(containerSelector).find('.reset-password-error').removeClass('hidden');
 
         // Removes loading
         $(this).removeClass('loading');
         $(this).find('span').removeClass('hidden');
         $(this).find('.loader').removeClass('show');
 
-        calculateElHeight($container.find('.state[data-state=reset-password]'));
+        calculateElHeight($(containerSelector).find('.state[data-state=reset-password]'));
       }
     });
 
-    $container.find('.resend-code').on('click', function() {
-      $container.find('.pin-sent-error').addClass('hidden');
-      $container.find('.pin-sent-success').addClass('hidden');
-      $container.find('.pin-code-field').val("");
-      if ($container.find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
-        $container.find('.state[data-state=verify-code] .form-group').removeClass('has-error');
+    $(containerSelector).on('click', '.resend-code', function() {
+      $(containerSelector).find('.pin-sent-error').addClass('hidden');
+      $(containerSelector).find('.pin-sent-success').addClass('hidden');
+      $(containerSelector).find('.pin-code-field').val("");
+      if ($(containerSelector).find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
+        $(containerSelector).find('.state[data-state=verify-code] .form-group').removeClass('has-error');
       }
-      if (!$container.find('.resend-code').hasClass('hidden')) {
-        $container.find('.resend-code').addClass('hidden');
+      if (!$(containerSelector).find('.resend-code').hasClass('hidden')) {
+        $(containerSelector).find('.resend-code').addClass('hidden');
       }
 
-      calculateElHeight($container.find('.state[data-state=verify-code]'));
+      calculateElHeight($(containerSelector).find('.state[data-state=verify-code]'));
 
       Fliplet.DataSources.connect(data.dataSource, { offline: false })
         .then(function(dataSource) {
@@ -435,17 +435,17 @@ $('[data-login-ds-id]').each(function() {
           where[data.emailColumn] = resetEmail;
           dataSource.sendValidation({ type: type, where: where })
           .then(function () {
-              $container.find('.pin-code-field').val("");
-              $container.find('.pin-sent-success').removeClass('hidden');
-              if ($container.find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
-                $container.find('.state[data-state=verify-code] .form-group').removeClass('has-error');
+              $(containerSelector).find('.pin-code-field').val("");
+              $(containerSelector).find('.pin-sent-success').removeClass('hidden');
+              if ($(containerSelector).find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
+                $(containerSelector).find('.state[data-state=verify-code] .form-group').removeClass('has-error');
               }
-              if (!$container.find('.resend-code').hasClass('hidden')) {
-                $container.find('.resend-code').addClass('hidden');
+              if (!$(containerSelector).find('.resend-code').hasClass('hidden')) {
+                $(containerSelector).find('.resend-code').addClass('hidden');
               }
           })
           .catch(function () {
-              $container.find('.pin-sent-error').text(CONTACT_UNREACHABLE).removeClass("hidden");
+              $(containerSelector).find('.pin-sent-error').text(CONTACT_UNREACHABLE).removeClass("hidden");
           });
         });
     });
@@ -471,8 +471,13 @@ $('[data-login-ds-id]').each(function() {
   Fliplet().then(function () {
     initEmailValidation();
 
+    if (Fliplet.Env.get('interact')) {
+      // Disables password fields in edit mode to avoid password autofill
+      $('input[type="password"]').prop('disabled', true);
+    }
+
     if (Fliplet.Env.is('web')) {
-      $container.on("fliplet_page_reloaded", initEmailValidation);
+      $(containerSelector).on('fliplet_page_reloaded', initEmailValidation);
     }
   });
 });
