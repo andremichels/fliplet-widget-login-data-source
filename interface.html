@@ -18,13 +18,15 @@
           <div class="col-sm-8">
             <label for="dataSource" class="select-proxy-display">
               <select name="select_datasource" id="dataSource" data-label="select" class="hidden-select form-control">
-                <option selected value="none">-- Select a data source --</option>
+                <option selected value="none">-- Select a data source</option>
+                <option disabled>------</option>
+                <option value="new">Create a new data source</option>
+                <option disabled>------</option>
               </select>
               <span class="icon fa fa-chevron-down"></span>
-              <span class="select-value-proxy">-- Select a data source --</span>
+              <span class="select-value-proxy">-- Select a data source</span>
             </label>
-            <small>or just <a href="#" class="create-data-source">create a new data source</a></small>
-            <div class="btn btn-default hidden" id="manage-data">Edit data</div>
+            <small id="manage-data" class="hidden"><a href="#">Edit data source</a></small>
           </div>
         </div>
         <div class="form-group hidden" id="select-email-field">
