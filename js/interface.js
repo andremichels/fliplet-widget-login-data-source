@@ -171,7 +171,14 @@ function createDataSource() {
   event.preventDefault();
   var name = prompt('Please type a name for your data source:');
 
-  if (!name) {
+  if (name === null) {
+    $dataSources.val('').trigger('change');
+    return;
+  }
+
+  if (name === '') {
+    $dataSources.val('').trigger('change');
+    alert('You must enter a data source name');
     return;
   }
 
@@ -193,7 +200,11 @@ function manageAppData() {
       size: 'large',
       package: 'com.fliplet.data-sources',
       title: 'Edit Data Sources',
-      data: { dataSourceId: dataSourceId }
+      classes: 'data-source-overlay',
+      data: {
+        context: 'overlay',
+        dataSourceId: dataSourceId
+      }
     }
   });
 }
@@ -204,8 +215,7 @@ Fliplet.Studio.onMessage(function(event) {
   }
 });
 
-$('.create-data-source').on('click', createDataSource);
-$('#manage-data').on('click', manageAppData);
+$('#manage-data a').on('click', manageAppData);
 
 $dataSource.on('change', function onDataSourceListChange() {
   var selectedOption = $(this).find("option:selected"),
@@ -215,6 +225,10 @@ $dataSource.on('change', function onDataSourceListChange() {
   $(this).parents('.select-proxy-display').find('.select-value-proxy').html(selectedText);
   $('#emailColumn option:gt(0)').remove();
   $('#passColumn option:gt(0)').remove();
+
+  if ( $(this).val() === "new" ) {
+    createDataSource();
+  }
 
   if ( $(this).val() !== "none" ) {
     $('#manage-data').removeClass('hidden');
