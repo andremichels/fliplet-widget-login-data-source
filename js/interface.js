@@ -23,7 +23,7 @@ var fields = [
 
 var linkData = $.extend(true, {
   action: 'screen',
-  page: 'none',
+  page: '',
   transition: 'slide.left',
   options: {
     hideAction: true
@@ -141,7 +141,7 @@ Fliplet.Widget.emit(validInputEventName, {
 
 Fliplet.DataSources.get({ organizationId: organizationId }).then(function (dataSources) {
   allDataSources = dataSources || [];
-  $dataSource.html('<option value="">-- Select a data source --</option>');
+  $dataSource.html('<option value="">-- Select a data source</option><option disabled>------</option><option value="new">Create a new data source</option><option disabled>------</option>');
   dataSources.forEach(renderDataSource);
   return Promise.resolve();
 }).then(initialiseData);
@@ -149,7 +149,7 @@ Fliplet.DataSources.get({ organizationId: organizationId }).then(function (dataS
 function reloadDataSource(dataSourceId) {
   Fliplet.DataSources.get({ organizationId: organizationId }, {cache: false}).then(function (dataSources) {
     allDataSources = dataSources || [];
-    $dataSource.html('<option value="">-- Select a data source --</option>');
+    $dataSource.html('<option value="">-- Select a data source</option><option disabled>------</option><option value="new">Create a new data source</option><option disabled>------</option>');
     dataSources.forEach(renderDataSource);
     return Promise.resolve();
   }).then(function() {
