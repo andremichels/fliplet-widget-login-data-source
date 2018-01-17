@@ -48,16 +48,20 @@ var loginActionProvider = Fliplet.Widget.open('com.fliplet.link', {
 // TinyMCE INIT
 tinymce.init({
   selector: '#validationEmail',
-  theme: 'modern',
   plugins: [
-    'advlist lists link image charmap hr',
-    'searchreplace insertdatetime table textcolor colorpicker code'
+    'lists advlist image charmap hr code',
+    'searchreplace wordcount insertdatetime table textcolor colorpicker'
   ],
-  toolbar: 'formatselect | fontselect fontsizeselect | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | link | bullist numlist outdent indent | blockquote subscript superscript | table charmap hr | removeformat | code',
+  toolbar: [
+    'formatselect |',
+    'bold italic underline strikethrough |',
+    'forecolor backcolor |',
+    'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent |',
+    'blockquote subscript superscript | table insertdatetime charmap hr |',
+    'removeformat | code'
+  ].join(' '),
   menubar: false,
-  statusbar: true,
-  inline: false,
-  resize: true,
+  statusbar: false,
   min_height: 300,
   setup : function(editor) {
     editor.on('init', function() {
