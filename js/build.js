@@ -89,14 +89,27 @@ $('[data-login-ds-id]').each(function() {
       });
   }
 
+  function createUserProfile(entry) {
+    entry = entry || {};
+    if (!entry.dataSourceId || !entry.id) {
+      return;
+    }
+
+    return {
+      type: 'dataSource',
+      dataSourceId: entry.dataSourceId,
+      dataSourceEntryId: entry.id
+    };
+  }
+
   function attachEventListeners() {
 
     $(containerSelector).on('click', '.btn-login', function() {
       var _this = $(this);
       _this.parents('.form-btns').find('.login-error').addClass('hidden');
 
-      window.profileEmail = $(containerSelector).find('input.profile_email').val().toLowerCase(); // GET EMAIL VALUE
-      window.profilePassword = $(containerSelector).find('input.profile_password').val();
+      var profileEmail = $(containerSelector).find('input.profile_email').val().toLowerCase();
+      var profilePassword = $(containerSelector).find('input.profile_password').val();
 
       // Triggers loading
       $(this).addClass('loading');
@@ -113,23 +126,30 @@ $('[data-login-ds-id]').each(function() {
           userDataPV.entry = entry;
           userDataPV.userLogged = true;
           // Set PV to be used by Chat
-          Fliplet.App.Storage.set({
-            'fl-chat-source-id': entry.dataSourceId,
-            'fl-chat-auth-email': profileEmail,
-            'fl-login-data-source': entry
-          });
-          Fliplet.Profile.set('email', profileEmail);
-          Fliplet.Security.Storage.update().then(function() {
+          var user = createUserProfile(entry);
+          return Promise.all([
+            Fliplet.App.Storage.set({
+              'fl-chat-source-id': entry.dataSourceId,
+              'fl-chat-auth-email': profileEmail,
+              'fl-login-data-source': entry
+            }),
+            Fliplet.Profile.set({
+              'email': profileEmail,
+              'user': user
+            }),
+            Fliplet.Security.Storage.update()
+          ])
+            .then(function() {
 
-            _this.removeClass('loading');
-            _this.find('span').removeClass('hidden');
-            _this.find('.loader').removeClass('show');
+              _this.removeClass('loading');
+              _this.find('span').removeClass('hidden');
+              _this.find('.loader').removeClass('show');
 
-            if (typeof data.loginAction !== "undefined" && !Fliplet.Env.get('disableSecurity')) {
-              Fliplet.Navigate.to(data.loginAction);
-            }
+              if (typeof data.loginAction !== "undefined" && !Fliplet.Env.get('disableSecurity')) {
+                Fliplet.Navigate.to(data.loginAction);
+              }
 
-          });
+            });
         }, function(error) {
           // Reset Login button
           _this.removeClass('loading');
