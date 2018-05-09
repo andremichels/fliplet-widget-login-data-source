@@ -17,7 +17,7 @@ $('[data-login-ds-id]').each(function() {
 
   var CODE_VALID = 30,
     APP_NAME = Fliplet.Env.get('appName'),
-    APP_VALIDATION_DATA_DIRECTORY_ID = data.dataSource,
+    APP_VALIDATION_DATA_DIRECTORY_ID = parseInt(data.dataSource, 10),
     DATA_DIRECTORY_EMAIL_COLUMN = data.emailColumn,
     DATA_DIRECTORY_PASS_COLUMN = data.passColumn,
     ORG_NAME = Fliplet.Env.get('organizationName');
@@ -38,11 +38,42 @@ $('[data-login-ds-id]').each(function() {
       if (!Fliplet.Env.get('disableSecurity')) {
         Fliplet.User.getCachedSession()
           .then(function(session) {
-            if (session && session.server && session.server.passports && session.server.passports.dataSource) {
-              setTimeout(function() {
-                Fliplet.Navigate.to(data.action);
-              }, 1000);
+            if (!session || !session.accounts) {
+              return Promise.reject('Login session not found');
             }
+
+            var dataSource = session.accounts.dataSource || [];
+            var verifiedAccounts = dataSource.filter(function (dataSourceAccount) {
+              return dataSourceAccount.dataSourceId === APP_VALIDATION_DATA_DIRECTORY_ID;
+            });
+
+            if (!verifiedAccounts.length) {
+              return Promise.reject('Login session not found');
+            }
+
+            // Update stored email address based on retrieved session
+            var entry = verifiedAccounts[0];
+            var email = entry.data[DATA_DIRECTORY_EMAIL_COLUMN];
+            var user = createUserProfile(entry);
+
+            return Fliplet.Profile.set({
+              'email': email,
+              'user': user
+            });
+          })
+          .then(function () {
+            if (typeof data.loginAction === 'undefined') {
+              return Promise.reject('Screen redirect is not set up.');
+            }
+
+            var navigate = Fliplet.Navigate.to(data.loginAction);
+            if (typeof navigate === 'object' && typeof navigate.then === 'function') {
+              return navigate;
+            }
+            return Promise.resolve();
+          })
+          .catch(function (error) {
+            console.warn(error);
           });
       }
     });
