@@ -56,10 +56,20 @@ $('[data-login-ds-id]').each(function() {
             var email = entry.data[DATA_DIRECTORY_EMAIL_COLUMN];
             var user = createUserProfile(entry);
 
-            return Fliplet.Profile.set({
-              'email': email,
-              'user': user
-            });
+            return Promise.all([
+              return Promise.all([
+                Fliplet.App.Storage.set({
+                  'fl-chat-source-id': entry.dataSourceId,
+                  'fl-chat-auth-email': email,
+                  'fl-login-data-source': entry
+                }),
+                Fliplet.Profile.set({
+                  'email': email,
+                  'user': user
+                }),
+                Fliplet.Security.Storage.update()
+              ])
+            ]);
           })
           .then(function () {
             if (typeof data.loginAction === 'undefined') {
