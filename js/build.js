@@ -103,18 +103,12 @@ $('[data-login-ds-id]').each(function() {
 
   }
 
-  function loginFromDataSource(data_source_id, where, success_callback, fail_callback) {
+  function loginFromDataSource(data_source_id, where) {
     return Fliplet.Session.authorize({
-      passport: "dataSource",
+      passport: 'dataSource',
       dataSourceId: data_source_id,
       where: where
-    })
-      .then(function(authorization) {
-        success_callback(authorization.session.entries.dataSource)
-      })
-      .catch(function() {
-        fail_callback(true);
-      });
+    });
   }
 
   function resetFromDataSource(data_source_id, where, success_callback, fail_callback) {
@@ -165,61 +159,76 @@ $('[data-login-ds-id]').each(function() {
         var where = {};
         where[DATA_DIRECTORY_EMAIL_COLUMN] = profileEmail;
         where[DATA_DIRECTORY_PASS_COLUMN] = profilePassword;
-        loginFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, where, function(entry) {
-          // Reset Login button
-          userDataPV.entry = entry;
-          userDataPV.userLogged = true;
-          // Set PV to be used by Chat
-          var user = createUserProfile(entry);
-          return Promise.all([
-            Fliplet.App.Storage.set({
-              'fl-chat-source-id': entry.dataSourceId,
-              'fl-chat-auth-email': profileEmail,
-              'fl-login-data-source': entry
-            }),
-            Fliplet.Profile.set({
-              'email': profileEmail,
-              'user': user
-            }),
-            Fliplet.Security.Storage.update()
-          ])
-            .then(function() {
+        loginFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, where)
+          .then(function(authorization) {
+            var entry = authorization.session.entries.dataSource;
+            // Reset Login button
+            userDataPV.entry = entry;
+            userDataPV.userLogged = true;
+            // Set PV to be used by Chat
+            var user = createUserProfile(entry);
+            return Promise.all([
+              Fliplet.App.Storage.set({
+                'fl-chat-source-id': entry.dataSourceId,
+                'fl-chat-auth-email': profileEmail,
+                'fl-login-data-source': entry
+              }),
+              Fliplet.Profile.set({
+                'email': profileEmail,
+                'user': user
+              }),
+              Fliplet.Security.Storage.update()
+            ])
+          })
+          .then(function() {
+            _this.removeClass('loading');
+            _this.find('span').removeClass('hidden');
+            _this.find('.loader').removeClass('show');
 
-              _this.removeClass('loading');
-              _this.find('span').removeClass('hidden');
-              _this.find('.loader').removeClass('show');
-
-              if (Fliplet.Env.get('disableSecurity')) {
-                return Fliplet.UI.Toast({
-                  type: 'regular',
-                  duration: false,
-                  tapToDismiss: false,
-                  title: 'Login successful',
-                  message: 'Note: You must enable app security via "Options > Enable app security for testing" to test any security features.',
-                  actions: [
-                    {
-                      label: 'OK',
-                      action: function () {
-                        Fliplet.UI.Toast.dismiss();
-                      }
+            if (Fliplet.Env.get('disableSecurity')) {
+              return Fliplet.UI.Toast({
+                type: 'regular',
+                duration: false,
+                tapToDismiss: false,
+                title: 'Login successful',
+                message: 'Note: You must enable app security via "Options > Enable app security for testing" to test any security features.',
+                actions: [
+                  {
+                    label: 'OK',
+                    action: function () {
+                      Fliplet.UI.Toast.dismiss();
                     }
-                  ]
-                });
-              }
+                  }
+                ]
+              });
+            }
 
-              if (typeof data.loginAction === 'undefined') {
-                return Fliplet.UI.Toast('Login successful');
-              } else {
-                return Fliplet.Navigate.to(data.loginAction);
-              }
+            if (typeof data.loginAction === 'undefined') {
+              return Fliplet.UI.Toast('Login successful');
+            } else {
+              return Fliplet.Navigate.to(data.loginAction);
+            }
+          })
+          .catch(function(error) {
+            // Reset Login button
+            _this.removeClass('loading');
+            _this.find('span').removeClass('hidden');
+            _this.find('.loader').removeClass('show');
+            _this.parents('.form-btns').find('.login-error').html('Your email or password don\'t match. Please try again.').removeClass('hidden');
+            Fliplet.UI.Toast({
+              message: 'Login error',
+              actions: [
+                {
+                  label: 'Details',
+                  action: function () {
+                    Fliplet.UI.Toast({
+                      html: error.message || error
+                    });
+                  }
+                }
+              ]
             });
-        }, function(error) {
-          // Reset Login button
-          _this.removeClass('loading');
-          _this.find('span').removeClass('hidden');
-          _this.find('.loader').removeClass('show');
-          _this.parents('.form-btns').find('.login-error').html("Your email or password don't match. Please try again.").removeClass('hidden');
-        });
+          });
       } else {
         // INVALID EMAIL
 
