@@ -108,7 +108,10 @@ $('[data-login-ds-id]').each(function() {
       passport: 'dataSource',
       dataSourceId: data_source_id,
       where: where
-    });
+    })
+      .catch(function (error) {
+        return Promise.reject(error.responseJSON || error);
+      });
   }
 
   function resetFromDataSource(data_source_id, where, success_callback, fail_callback) {
@@ -222,7 +225,7 @@ $('[data-login-ds-id]').each(function() {
                   label: 'Details',
                   action: function () {
                     Fliplet.UI.Toast({
-                      html: error.message || error
+                      html: error.message || JSON.stringify(error)
                     });
                   }
                 }
