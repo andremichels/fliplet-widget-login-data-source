@@ -184,10 +184,29 @@ $('[data-login-ds-id]').each(function() {
               _this.find('span').removeClass('hidden');
               _this.find('.loader').removeClass('show');
 
-              if (typeof data.loginAction !== "undefined" && !Fliplet.Env.get('disableSecurity')) {
-                Fliplet.Navigate.to(data.loginAction);
+              if (Fliplet.Env.get('disableSecurity')) {
+                return Fliplet.UI.Toast({
+                  type: 'regular',
+                  duration: false,
+                  tapToDismiss: false,
+                  title: 'Login successful',
+                  message: 'Note: You must enable app security via "Options > Enable app security for testing" to test any security features.',
+                  actions: [
+                    {
+                      label: 'OK',
+                      action: function () {
+                        Fliplet.UI.Toast.dismiss();
+                      }
+                    }
+                  ]
+                });
               }
 
+              if (typeof data.loginAction === 'undefined') {
+                return Fliplet.UI.Toast('Login successful');
+              } else {
+                return Fliplet.Navigate.to(data.loginAction);
+              }
             });
         }, function(error) {
           // Reset Login button
