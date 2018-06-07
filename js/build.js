@@ -144,6 +144,11 @@ $('[data-login-ds-id]').each(function() {
   function attachEventListeners() {
 
     $(containerSelector).on('click', '.btn-login', function() {
+      $(containerSelector).find('.fl-login-form form').trigger('submit');
+    });
+
+    $(containerSelector).on('submit', '.fl-login-form form', function(e) {
+      e.preventDefault();
       var _this = $(this);
       _this.parents('.form-btns').find('.login-error').addClass('hidden');
 
