@@ -114,14 +114,10 @@ $('[data-login-ds-id]').each(function() {
       });
   }
 
-  function resetFromDataSource(data_source_id, where, success_callback, fail_callback) {
-    Fliplet.DataSources.connect(data.dataSource, { offline: false })
+  function resetFromDataSource(data_source_id, where) {
+    return Fliplet.DataSources.connect(data.dataSource, { offline: false })
       .then(function(dataSource) {
-        dataSource.sendValidation({type: 'email', where: where})
-          .then(success_callback)
-          .catch(function () {
-            fail_callback(true);
-          });
+        return dataSource.sendValidation({type: 'email', where: where})
       });
   }
 
@@ -157,82 +153,7 @@ $('[data-login-ds-id]').each(function() {
       $(this).find('span').addClass('hidden');
       $(this).find('.loader').addClass('show');
 
-      if (validateEmail(profileEmail)) {
-        // CHECK FOR EMAIL ON DATA SOURCE
-        var where = {};
-        where[DATA_DIRECTORY_EMAIL_COLUMN] = profileEmail;
-        where[DATA_DIRECTORY_PASS_COLUMN] = profilePassword;
-        loginFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, where)
-          .then(function(authorization) {
-            var entry = authorization.session.entries.dataSource;
-            // Reset Login button
-            userDataPV.entry = entry;
-            userDataPV.userLogged = true;
-            // Set PV to be used by Chat
-            var user = createUserProfile(entry);
-            return Promise.all([
-              Fliplet.App.Storage.set({
-                'fl-chat-source-id': entry.dataSourceId,
-                'fl-chat-auth-email': profileEmail,
-                'fl-login-data-source': entry
-              }),
-              Fliplet.Profile.set({
-                'email': profileEmail,
-                'user': user
-              }),
-              Fliplet.Security.Storage.update()
-            ])
-          })
-          .then(function() {
-            _this.removeClass('loading');
-            _this.find('span').removeClass('hidden');
-            _this.find('.loader').removeClass('show');
-
-            if (Fliplet.Env.get('disableSecurity')) {
-              return Fliplet.UI.Toast({
-                type: 'regular',
-                duration: false,
-                tapToDismiss: false,
-                title: 'Login successful',
-                message: 'Note: You must enable app security via "Options > Enable app security for testing" to test any security features.',
-                actions: [
-                  {
-                    label: 'OK',
-                    action: function () {
-                      Fliplet.UI.Toast.dismiss();
-                    }
-                  }
-                ]
-              });
-            }
-
-            if (typeof data.loginAction === 'undefined') {
-              return Fliplet.UI.Toast('Login successful');
-            } else {
-              return Fliplet.Navigate.to(data.loginAction);
-            }
-          })
-          .catch(function(error) {
-            // Reset Login button
-            _this.removeClass('loading');
-            _this.find('span').removeClass('hidden');
-            _this.find('.loader').removeClass('show');
-            _this.parents('.form-btns').find('.login-error').html('Your email or password don\'t match. Please try again.').removeClass('hidden');
-            Fliplet.UI.Toast({
-              message: 'Login error',
-              actions: [
-                {
-                  label: 'Details',
-                  action: function () {
-                    Fliplet.UI.Toast({
-                      html: error.message || JSON.stringify(error)
-                    });
-                  }
-                }
-              ]
-            });
-          });
-      } else {
+      if (!validateEmail(profileEmail)) {
         // INVALID EMAIL
 
         // Reset Login button
@@ -241,7 +162,93 @@ $('[data-login-ds-id]').each(function() {
         _this.find('.loader').removeClass('show');
         // Show error
         _this.parents('.form-btns').find('.login-error').html("Please enter a valid email.").removeClass('hidden');
+        return;
       }
+
+      // CHECK FOR EMAIL ON DATA SOURCE
+      var where = {};
+      where[DATA_DIRECTORY_EMAIL_COLUMN] = profileEmail;
+      where[DATA_DIRECTORY_PASS_COLUMN] = profilePassword;
+      loginFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, where)
+        .then(function(authorization) {
+          Fliplet.Analytics.trackEvent({
+            category: 'login_datasource',
+            action: 'login_pass'
+          });
+
+          var entry = authorization.session.entries.dataSource;
+          // Reset Login button
+          userDataPV.entry = entry;
+          userDataPV.userLogged = true;
+          // Set PV to be used by Chat
+          var user = createUserProfile(entry);
+          return Promise.all([
+            Fliplet.App.Storage.set({
+              'fl-chat-source-id': entry.dataSourceId,
+              'fl-chat-auth-email': profileEmail,
+              'fl-login-data-source': entry
+            }),
+            Fliplet.Profile.set({
+              'email': profileEmail,
+              'user': user
+            }),
+            Fliplet.Security.Storage.update()
+          ])
+        })
+        .then(function() {
+          _this.removeClass('loading');
+          _this.find('span').removeClass('hidden');
+          _this.find('.loader').removeClass('show');
+
+          if (Fliplet.Env.get('disableSecurity')) {
+            return Fliplet.UI.Toast({
+              type: 'regular',
+              duration: false,
+              tapToDismiss: false,
+              title: 'Login successful',
+              message: 'Note: You must enable app security via "Options > Enable app security for testing" to test any security features.',
+              actions: [
+                {
+                  label: 'OK',
+                  action: function () {
+                    Fliplet.UI.Toast.dismiss();
+                  }
+                }
+              ]
+            });
+          }
+
+          if (typeof data.loginAction === 'undefined') {
+            return Fliplet.UI.Toast('Login successful');
+          } else {
+            return Fliplet.Navigate.to(data.loginAction);
+          }
+        })
+        .catch(function(error) {
+          Fliplet.Analytics.trackEvent({
+            category: 'login_datasource',
+            action: 'login_fail'
+          });
+
+          // Reset Login button
+          _this.removeClass('loading');
+          _this.find('span').removeClass('hidden');
+          _this.find('.loader').removeClass('show');
+          _this.parents('.form-btns').find('.login-error').html('Your email or password don\'t match. Please try again.').removeClass('hidden');
+          Fliplet.UI.Toast({
+            message: 'Login error',
+            actions: [
+              {
+                label: 'Details',
+                action: function () {
+                  Fliplet.UI.Toast({
+                    html: error.message || JSON.stringify(error)
+                  });
+                }
+              }
+            ]
+          });
+        });
     });
 
     // EVENT LISTENER FOR FORGET PASSWORD RESET
@@ -281,11 +288,26 @@ $('[data-login-ds-id]').each(function() {
       }
 
       // VALIDATE EMAIL
-      if (validateEmail(resetEmail)) {
-        // CHECK FOR EMAIL ON DATA SOURCE
-        var where = {};
-        where[DATA_DIRECTORY_EMAIL_COLUMN] = resetEmail;
-        resetFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, where, function(entry) {
+      if (!validateEmail(resetEmail)) {
+        // INVALID EMAIL
+        _this.removeClass("disabled");
+        $(containerSelector).find('.reset-email-error').html("Please enter a valid email address and try again.").removeClass('hidden');
+        $(containerSelector).find('.state[data-state=verify-email] .form-group').addClass('has-error');
+        calculateElHeight($(containerSelector).find('.state[data-state=verify-email]'));
+        return;
+      }
+
+      // CHECK FOR EMAIL ON DATA SOURCE
+      var where = {};
+      where[DATA_DIRECTORY_EMAIL_COLUMN] = resetEmail;
+
+      Fliplet.Analytics.trackEvent({
+        category: 'login_datasource',
+        action: 'forgot_password'
+      });
+
+      resetFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, where)
+        .then(function(entry) {
           if ($(containerSelector).find('.state[data-state=verify-email] .form-group').hasClass('has-error')) {
             $(containerSelector).find('.state[data-state=verify-email] .form-group').removeClass('has-error');
           }
@@ -295,21 +317,14 @@ $('[data-login-ds-id]').each(function() {
           calculateElHeight($(containerSelector).find('.state[data-state=verify-code]'));
           $(containerSelector).find('.state[data-state=verify-code]').removeClass('future').addClass('present');
           
-        }, function(error) {
+        })
+        .catch(function() {
           // EMAIL NOT FOUND ON DATA SOURCE
           _this.removeClass("disabled");
           $(containerSelector).find('.reset-email-error').html("We couldn't find your email in our system. Please try again.").removeClass('hidden');
           $(containerSelector).find('.state[data-state=verify-email] .form-group').addClass('has-error');
           calculateElHeight($(containerSelector).find('.state[data-state=verify-email]'));
         });
-
-      } else {
-        // INVALID EMAIL
-        _this.removeClass("disabled");
-        $(containerSelector).find('.reset-email-error').html("Please enter a valid email address and try again.").removeClass('hidden');
-        $(containerSelector).find('.state[data-state=verify-email] .form-group').addClass('has-error');
-        calculateElHeight($(containerSelector).find('.state[data-state=verify-email]'));
-      }
     });
 
     $(containerSelector).on('click', '.back.start', function() {
@@ -529,19 +544,19 @@ $('[data-login-ds-id]').each(function() {
           var where = {};
           where[data.emailColumn] = resetEmail;
           dataSource.sendValidation({ type: type, where: where })
-          .then(function () {
-              $(containerSelector).find('.pin-code-field').val("");
-              $(containerSelector).find('.pin-sent-success').removeClass('hidden');
-              if ($(containerSelector).find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
-                $(containerSelector).find('.state[data-state=verify-code] .form-group').removeClass('has-error');
-              }
-              if (!$(containerSelector).find('.resend-code').hasClass('hidden')) {
-                $(containerSelector).find('.resend-code').addClass('hidden');
-              }
-          })
-          .catch(function () {
-              $(containerSelector).find('.pin-sent-error').text(CONTACT_UNREACHABLE).removeClass("hidden");
-          });
+            .then(function () {
+                $(containerSelector).find('.pin-code-field').val("");
+                $(containerSelector).find('.pin-sent-success').removeClass('hidden');
+                if ($(containerSelector).find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
+                  $(containerSelector).find('.state[data-state=verify-code] .form-group').removeClass('has-error');
+                }
+                if (!$(containerSelector).find('.resend-code').hasClass('hidden')) {
+                  $(containerSelector).find('.resend-code').addClass('hidden');
+                }
+            })
+            .catch(function () {
+                $(containerSelector).find('.pin-sent-error').text(CONTACT_UNREACHABLE).removeClass("hidden");
+            });
         });
     });
   }
