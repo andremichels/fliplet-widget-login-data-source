@@ -7,6 +7,11 @@ $('[data-login-ds-id]').each(function() {
   var data = Fliplet.Widget.getData(widgetId);
   var dataSourceEntry; // Data source entry after user verify email
 
+  // Do not track login related redirects
+  if (typeof data.loginAction !== 'undefined') {
+    data.loginAction.track = false;
+  }
+
   this.pvName = 'login_data_source_component_' + Fliplet.Env.get('appId');
   var dataStructure = {
     auth_token: '',
