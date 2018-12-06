@@ -45,6 +45,11 @@ var loginActionProvider = Fliplet.Widget.open('com.fliplet.link', {
   }
 });
 
+var tempColumnValues = {
+  emailColumn: data['emailColumn'],
+  passColumn : data['passColumn']
+}
+
 // TinyMCE INIT
 tinymce.init({
   selector: '#validationEmail',
@@ -213,6 +218,10 @@ function manageAppData() {
   });
 }
 
+function syncTempColumns(columnType){
+  tempColumnValues[columnType] = $('#'+columnType).val();
+}
+
 Fliplet.Studio.onMessage(function(event) {
   if (event.data && event.data.event === 'overlay-close') {
     reloadDataSource(event.data.data.dataSourceId);
@@ -248,8 +257,8 @@ $dataSource.on('change', function onDataSourceListChange() {
     if(dataSource.id == selectedValue && typeof dataSource.columns !== "undefined") {
       currentDataSource = dataSource;
       dataSource.columns.forEach(renderDataSourceColumn);
-      $('#emailColumn').trigger('change');
-      $('#passColumn').trigger('change');
+      $('#emailColumn').val(tempColumnValues.emailColumn).trigger('change');
+      $('#passColumn').val(tempColumnValues.passColumn).trigger('change');
     }
   });
 });
@@ -259,6 +268,8 @@ $('#emailColumn, #passColumn').on('change', function() {
   var selectedText = $(this).find("option:selected").text();
   $(this).parents('.select-proxy-display').find('.select-value-proxy').html(selectedText);
 
+  syncTempColumns($(this).attr('id'));
+  
   Fliplet.Widget.emit(validInputEventName, {
     isValid: selectedValue !== 'none'
   });
