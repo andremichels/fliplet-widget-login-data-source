@@ -197,6 +197,7 @@ $('[data-login-ds-id]').each(function() {
               'email': profileEmail,
               'user': user
             }),
+            Fliplet.Security.Storage.update(),
             Fliplet.Hooks.run('login', {
               passport: 'dataSource',
               session: authorization.session,
