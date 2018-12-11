@@ -197,7 +197,13 @@ $('[data-login-ds-id]').each(function() {
               'email': profileEmail,
               'user': user
             }),
-            Fliplet.Security.Storage.update()
+            Fliplet.Security.Storage.update(),
+            Fliplet.Hooks.run('login', {
+              passport: 'dataSource',
+              session: authorization.session,
+              entry: entry,
+              userProfile: user
+            })
           ])
         })
         .then(function() {
@@ -321,7 +327,7 @@ $('[data-login-ds-id]').each(function() {
           _this.removeClass("disabled");
           calculateElHeight($(containerSelector).find('.state[data-state=verify-code]'));
           $(containerSelector).find('.state[data-state=verify-code]').removeClass('future').addClass('present');
-          
+
         })
         .catch(function() {
           // EMAIL NOT FOUND ON DATA SOURCE
@@ -380,7 +386,7 @@ $('[data-login-ds-id]').each(function() {
         .then(function(dataSource) {
           var where = { code: code };
           where[data.emailColumn] = resetEmail;
-          
+
           Fliplet.Session.get()
             .then(function() {
               dataSource.validate({ type: 'email', where: where })
@@ -398,7 +404,7 @@ $('[data-login-ds-id]').each(function() {
                   if ($(containerSelector).find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
                     $(containerSelector).find('.state[data-state=verify-code] .form-group').removeClass('has-error');
                   }
-        
+
                   userDataPV.resetVerified = true;
                   userDataPV.code = "";
                   userDataPV.code_generated_at = "";
@@ -406,11 +412,11 @@ $('[data-login-ds-id]').each(function() {
                     _this.removeClass('loading');
                     _this.find('span').removeClass('hidden');
                     _this.find('.loader').removeClass('show');
-        
+
                     $(containerSelector).find('.state.present').removeClass('present').addClass('past');
                     calculateElHeight($(containerSelector).find('.state[data-state=reset-password]'));
                     $(containerSelector).find('.state[data-state=reset-password]').removeClass('future').addClass('present');
-        
+
                     // Analytics - Info Event
                     Fliplet.Analytics.info({
                       email: userDataPV.email,
@@ -428,7 +434,7 @@ $('[data-login-ds-id]').each(function() {
                   calculateElHeight($(containerSelector).find('.state[data-state=verify-code]'));
                 });
             })
-        });  
+        });
     });
 
     // UPDATE PASSWORD
@@ -465,7 +471,7 @@ $('[data-login-ds-id]').each(function() {
                     _this.removeClass('loading');
                     _this.find('span').removeClass('hidden');
                     _this.find('.loader').removeClass('show');
-          
+
                     $(containerSelector).find('.state.present').removeClass('present').addClass('past');
                     calculateElHeight($(containerSelector).find('.state[data-state=all-done]'));
                     $(containerSelector).find('.state[data-state=all-done]').removeClass('future').addClass('present');
@@ -475,7 +481,7 @@ $('[data-login-ds-id]').each(function() {
                     _this.removeClass('loading');
                     _this.find('span').removeClass('hidden');
                     _this.find('.loader').removeClass('show');
-  
+
                     $(containerSelector).find('.reset-password-error').html('Something went wrong! Try again.');
                     $(containerSelector).find('.reset-password-error').removeClass('hidden');
                   });
@@ -485,24 +491,24 @@ $('[data-login-ds-id]').each(function() {
               _this.removeClass('loading');
               _this.find('span').removeClass('hidden');
               _this.find('.loader').removeClass('show');
-  
+
               $(containerSelector).find('.state.present').removeClass('present').addClass('future');
-  
+
               $(containerSelector).find('.reset-email-field').val(""); // RESETS EMAIL VALUE
               $(containerSelector).find('.pin-code-field').val(""); // RESETS PIN
-  
+
               //check the validation current state.
               if (userDataPV.code !== "" && userDataPV.code_generated_at > Date.now() - (CODE_VALID * 60 * 1000)) {
                 $(containerSelector).find('.have-code').removeClass('hidden');
               }
-  
+
               $(containerSelector).find('.authenticate').removeClass('loading');
               $(containerSelector).find('.authenticate').find('span').removeClass('hidden');
               $(containerSelector).find('.authenticate').find('.loader').removeClass('show');
-  
+
               $(containerSelector).find('.reset-email-error').html("You need to verify your email first.").removeClass('hidden');
               $(containerSelector).find('.state[data-state=verify-email] .form-group').addClass('has-error');
-  
+
               calculateElHeight($(containerSelector).find('.state[data-state=verify-email]'));
               $(containerSelector).find('.state[data-state=verify-email]').removeClass('past').addClass('present');
             }
