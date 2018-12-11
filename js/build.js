@@ -202,7 +202,7 @@ $('[data-login-ds-id]').each(function() {
               passport: 'dataSource',
               session: authorization.session,
               entry: entry,
-              profile: user
+              userProfile: user
             })
           ])
         })
