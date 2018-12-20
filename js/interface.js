@@ -143,7 +143,7 @@ Fliplet.Widget.emit(validInputEventName, {
   isValid: false
 });
 
-Fliplet.DataSources.get({ organizationId: organizationId }).then(function (dataSources) {
+Fliplet.DataSources.get({ organizationId: organizationId, appId: Fliplet.Env.get('appId') }).then(function (dataSources) {
   allDataSources = dataSources || [];
   $dataSource.html('<option value="">-- Select a data source</option><option disabled>------</option><option value="new">Create a new data source</option><option disabled>------</option>');
   dataSources.forEach(renderDataSource);
@@ -151,7 +151,7 @@ Fliplet.DataSources.get({ organizationId: organizationId }).then(function (dataS
 }).then(initialiseData);
 
 function reloadDataSource(dataSourceId) {
-  Fliplet.DataSources.get({ organizationId: organizationId }, {cache: false}).then(function (dataSources) {
+  Fliplet.DataSources.get({ organizationId: organizationId, appId: Fliplet.Env.get('appId') }, {cache: false}).then(function (dataSources) {
     allDataSources = dataSources || [];
     $dataSource.html('<option value="">-- Select a data source</option><option disabled>------</option><option value="new">Create a new data source</option><option disabled>------</option>');
     dataSources.forEach(renderDataSource);
