@@ -171,6 +171,11 @@ $('[data-login-ds-id]').each(function() {
       where[DATA_DIRECTORY_PASS_COLUMN] = profilePassword;
       loginFromDataSource(APP_VALIDATION_DATA_DIRECTORY_ID, where)
         .then(function(authorization) {
+          if (typeof authorization !== 'object') {
+            // Error message from Fliplet.API.request called in offline mode
+            return Promise.reject(authorization);
+          }
+
           Fliplet.Analytics.trackEvent({
             category: 'login_datasource',
             action: 'login_pass'
