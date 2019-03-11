@@ -295,7 +295,7 @@ $('[data-login-ds-id]').each(function() {
       // VALIDATE EMAIL
       if (!validateEmail(resetEmail)) {
         // INVALID EMAIL
-        _this.removeClass('disabled');
+        _this.removeClass('loading');
         _this.find('.btn-label').removeClass('hidden');
         _this.find('.loader').removeClass('show');
         $(containerSelector).find('.reset-email-error').html('Please enter a valid email address and try again.').removeClass('hidden');
@@ -437,103 +437,99 @@ $('[data-login-ds-id]').each(function() {
     });
 
     // UPDATE PASSWORD
-    $(containerSelector).on('click', '.update-password', function() {
-      var _this = $(this);
+    $(containerSelector).on('submit', '.form-reset-password', function(event) {
+      event.preventDefault();
 
-      $(containerSelector).find('.reset-password-error').addClass('hidden');
-
-      // Simulates loading
-      $(this).addClass('loading');
-      $(this).find('.btn-label').addClass('hidden');
-      $(this).find('.loader').addClass('show');
+      var _this = $(this).find('.update-password');
+      _this.addClass('loading');
+      _this.find('.btn-label').addClass('hidden');
+      _this.find('.loader').addClass('show');
 
       var newPassword = $(containerSelector).find('.new-password').val();
       var confirmPassword = $(containerSelector).find('.confirm-password').val();
+      var error = '';
 
-      if (newPassword || confirmPassword) {
-        if (newPassword === confirmPassword) {
-          Fliplet.Session.get().then(function (session) {
-            if (session.entries && session.entries.dataSource) {
-              entryId = 'session'; // this works because you can use it as an ID on the backend
-              entry = session.entries.dataSource;
-              return Fliplet.DataSources.connect(data.dataSource, { offline: false }).then(function(dataSource) {
-                var options = {
-                  type: 'update',
-                  where: {},
-                  dataSourceEntryId: dataSourceEntry.id,
-                  data: {}
-                };
-                options.where[data.emailColumn] = resetEmail;
-                options.data[data.passColumn] = newPassword;
-                return dataSource.query(options)
-                  .then(function onPasswordUpdateSuccess() {
-                    _this.removeClass('loading');
-                    _this.find('.btn-label').removeClass('hidden');
-                    _this.find('.loader').removeClass('show');
+      if (!newPassword || !confirmPassword) {
+        error = 'Enter a new password and confirm. Try again.';
+      }
 
-                    $(containerSelector).find('.state.present').removeClass('present').addClass('past');
-                    calculateElHeight($(containerSelector).find('.state[data-state=all-done]'));
-                    $(containerSelector).find('.state[data-state=all-done]').removeClass('future').addClass('present');
-                  })
-                  .catch(function onPasswordUpdateError (error) {
-                    // Query failed due to some datasource missconfiguration or access denied
-                    _this.removeClass('loading');
-                    _this.find('.btn-label').removeClass('hidden');
-                    _this.find('.loader').removeClass('show');
+      if (newPassword !== confirmPassword) {
+        error = 'Passwords don\'t match. Please try again.';
+      }
 
-                    $(containerSelector).find('.reset-password-error').html('Something went wrong! Try again.');
-                    $(containerSelector).find('.reset-password-error').removeClass('hidden');
-                  });
-              });
-            } else {
-              // User tried to update password without being verified
-              _this.removeClass('loading');
-              _this.find('.btn-label').removeClass('hidden');
-              _this.find('.loader').removeClass('show');
-
-              $(containerSelector).find('.state.present').removeClass('present').addClass('future');
-
-              $(containerSelector).find('.reset-email-field').val(''); // RESETS EMAIL VALUE
-              $(containerSelector).find('.pin-code-field').val(''); // RESETS PIN
-
-              //check the validation current state.
-              if (userDataPV.code !== '' && userDataPV.code_generated_at > Date.now() - (CODE_VALID * 60 * 1000)) {
-                $(containerSelector).find('.have-code').removeClass('hidden');
-              }
-
-              $(containerSelector).find('.authenticate').removeClass('loading');
-              $(containerSelector).find('.authenticate').find('.btn-label').removeClass('hidden');
-              $(containerSelector).find('.authenticate').find('.loader').removeClass('show');
-
-              $(containerSelector).find('.reset-email-error').html('You need to verify your email first.').removeClass('hidden');
-              $(containerSelector).find('.state[data-state=verify-email] .form-group').addClass('has-error');
-
-              calculateElHeight($(containerSelector).find('.state[data-state=verify-email]'));
-              $(containerSelector).find('.state[data-state=verify-email]').removeClass('past').addClass('present');
-            }
-          });
-        } else {
-          $(containerSelector).find('.reset-password-error').html('Passwords don\'t match. Please try again.');
-          $(containerSelector).find('.reset-password-error').removeClass('hidden');
-
-          // Removes loading
-          $(this).removeClass('loading');
-          $(this).find('.btn-label').removeClass('hidden');
-          $(this).find('.loader').removeClass('show');
-
-          calculateElHeight($(containerSelector).find('.state[data-state=reset-password]'));
-        }
-      } else {
-        $(containerSelector).find('.reset-password-error').html('Enter a new password and confirm. Try again.');
+      if (error) {
+        $(containerSelector).find('.reset-password-error').html(error);
         $(containerSelector).find('.reset-password-error').removeClass('hidden');
 
         // Removes loading
-        $(this).removeClass('loading');
-        $(this).find('.btn-label').removeClass('hidden');
-        $(this).find('.loader').removeClass('show');
+        _this.removeClass('loading');
+        _this.find('.btn-label').removeClass('hidden');
+        _this.find('.loader').removeClass('show');
 
         calculateElHeight($(containerSelector).find('.state[data-state=reset-password]'));
+        return;
       }
+
+      Fliplet.Session.get().then(function (session) {
+        if (session.entries && session.entries.dataSource) {
+          entryId = 'session'; // this works because you can use it as an ID on the backend
+          entry = session.entries.dataSource;
+          return Fliplet.DataSources.connect(data.dataSource, { offline: false }).then(function(dataSource) {
+            var options = {
+              type: 'update',
+              where: {},
+              dataSourceEntryId: dataSourceEntry.id,
+              data: {}
+            };
+            options.where[data.emailColumn] = resetEmail;
+            options.data[data.passColumn] = newPassword;
+            return dataSource.query(options)
+              .then(function onPasswordUpdateSuccess() {
+                _this.removeClass('loading');
+                _this.find('.btn-label').removeClass('hidden');
+                _this.find('.loader').removeClass('show');
+
+                $(containerSelector).find('.state.present').removeClass('present').addClass('past');
+                calculateElHeight($(containerSelector).find('.state[data-state=all-done]'));
+                $(containerSelector).find('.state[data-state=all-done]').removeClass('future').addClass('present');
+              })
+              .catch(function onPasswordUpdateError (error) {
+                // Query failed due to some datasource missconfiguration or access denied
+                _this.removeClass('loading');
+                _this.find('.btn-label').removeClass('hidden');
+                _this.find('.loader').removeClass('show');
+
+                $(containerSelector).find('.reset-password-error').html('Something went wrong! Try again.');
+                $(containerSelector).find('.reset-password-error').removeClass('hidden');
+              });
+          });
+        } else {
+          // User tried to update password without being verified
+          _this.removeClass('loading');
+          _this.find('.btn-label').removeClass('hidden');
+          _this.find('.loader').removeClass('show');
+
+          $(containerSelector).find('.state.present').removeClass('present').addClass('future');
+
+          $(containerSelector).find('.reset-email-field').val(''); // RESETS EMAIL VALUE
+          $(containerSelector).find('.pin-code-field').val(''); // RESETS PIN
+
+          //check the validation current state.
+          if (userDataPV.code !== '' && userDataPV.code_generated_at > Date.now() - (CODE_VALID * 60 * 1000)) {
+            $(containerSelector).find('.have-code').removeClass('hidden');
+          }
+
+          $(containerSelector).find('.authenticate').removeClass('loading');
+          $(containerSelector).find('.authenticate').find('.btn-label').removeClass('hidden');
+          $(containerSelector).find('.authenticate').find('.loader').removeClass('show');
+
+          $(containerSelector).find('.reset-email-error').html('You need to verify your email first.').removeClass('hidden');
+          $(containerSelector).find('.state[data-state=verify-email] .form-group').addClass('has-error');
+
+          calculateElHeight($(containerSelector).find('.state[data-state=verify-email]'));
+          $(containerSelector).find('.state[data-state=verify-email]').removeClass('past').addClass('present');
+        }
+      });
     });
 
     // RESEND CODE
