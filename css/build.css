@@ -32,6 +32,8 @@ img {
 
 input.form-control {
   height: 45px;
+  box-shadow: none;
+  -webkit-appearance: none;
 }
 
 .fl-login-form .fl-email:before {
