@@ -24,7 +24,7 @@ var fields = [
 var linkData = $.extend(true, {
   action: 'screen',
   page: '',
-  transition: 'slide.left',
+  transition: 'fade',
   options: {
     hideAction: true
   }
@@ -110,38 +110,41 @@ function save(notifyComplete) {
     data[fieldId] = $('#' + fieldId).val();
   });
 
-  
-  
-  var definition = currentDataSource && currentDataSource.definition || {};
-  var validation = {
-    email: {
-      domain: false,
-      expire: "60",
-      domains: [],
-      template: {
-        to: [],
-        html: data.emailTemplate || defaultEmailTemplate,
-        subject: "Validate your email address"
-      },
-      toColumn: data.emailColumn,
-      matchColumn: data.emailColumn
-    }
-  };
-  definition.validation = validation;
+  var updateDataSource = Promise.resolve();
 
-  // Update data source definitions
-  var options = { id: data.dataSource, definition: definition };
-  Fliplet.DataSources.update(options)
-    .then(function() {
-      Fliplet.Widget.save(data).then(function () {
-        if (notifyComplete) {
-          Fliplet.Widget.complete();
-          window.location.reload();
-        } else {
-          Fliplet.Studio.emit('reload-widget-instance', widgetId);
-        }
-      });
-    })
+  if (currentDataSource) {
+    var definition = currentDataSource.definition || {};
+    var validation = {
+      email: {
+        domain: false,
+        expire: "60",
+        domains: [],
+        template: {
+          to: [],
+          html: data.emailTemplate || defaultEmailTemplate,
+          subject: "Validate your email address"
+        },
+        toColumn: data.emailColumn,
+        matchColumn: data.emailColumn
+      }
+    };
+    definition.validation = validation;
+
+    // Update data source definitions
+    var options = { id: data.dataSource, definition: definition };
+    updateDataSource = Fliplet.DataSources.update(options);
+  }
+
+  return updateDataSource.then(function() {
+    return Fliplet.Widget.save(data).then(function () {
+      if (notifyComplete) {
+        Fliplet.Widget.complete();
+        window.location.reload();
+      } else {
+        Fliplet.Studio.emit('reload-widget-instance', widgetId);
+      }
+    });
+  });
 }
 
 Fliplet.Widget.emit(validInputEventName, {
@@ -153,7 +156,7 @@ Fliplet.DataSources.get({ organizationId: organizationId, appId: Fliplet.Env.get
   $dataSource.html('<option value="">-- Select a data source</option><option disabled>------</option><option value="new">Create a new data source</option><option disabled>------</option>');
   dataSources.forEach(renderDataSource);
   return Promise.resolve();
-}).then(initialiseData);
+}).then(initializeData);
 
 function reloadDataSource(dataSourceId) {
   Fliplet.DataSources.get({ organizationId: organizationId, appId: Fliplet.Env.get('appId') }, {cache: false}).then(function (dataSources) {
@@ -269,23 +272,22 @@ $('#emailColumn, #passColumn').on('change', function() {
   $(this).parents('.select-proxy-display').find('.select-value-proxy').html(selectedText);
 
   syncTempColumns($(this).attr('id'));
-  
+
   Fliplet.Widget.emit(validInputEventName, {
     isValid: selectedValue !== 'none'
   });
 });
 
 $('#allow_reset').on('change', function() {
-
-  if ( $(this).is(':checked') ) {
-  	$('.reset-pass-redirect').removeClass('hidden');
+  if ($(this).prop('checked')) {
+    $('.reset-pass-redirect').removeClass('hidden');
     data.allowReset = true;
   } else {
-  	$('.reset-pass-redirect').addClass('hidden');
+    $('.reset-pass-redirect').addClass('hidden');
     data.allowReset = false;
   }
 
-  if(initialLoadingDone) {
+  if (initialLoadingDone) {
     save();
   }
 
@@ -296,15 +298,14 @@ $('#help_tip').on('click', function() {
   alert("During beta, please use live chat and let us know what you need help with.");
 });
 
-function initialiseData() {
-
+function initializeData() {
   fields.forEach(function (fieldId) {
-    if(data[fieldId]) {
+    if (data[fieldId]) {
       $('#' + fieldId).val(data[fieldId]).change();
     }
   });
 
-  if ( data.allowReset ) {
+  if (data.allowReset) {
     $('#allow_reset').trigger('change');
   }
 }
