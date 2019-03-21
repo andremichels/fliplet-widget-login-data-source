@@ -320,7 +320,7 @@ $('[data-login-ds-id]').each(function() {
           }
           $(containerSelector).find('.state[data-state=verify-email]').removeClass('present').addClass('past');
           $(containerSelector).find('.verify-user-email').text(resetEmail); // UPDATES TEXT WITH EMAIL
-          _this.removeClass('disabled');
+          _this.removeClass('loading');
           _this.find('.btn-label').removeClass('hidden');
           _this.find('.loader').removeClass('show');
           calculateElHeight($(containerSelector).find('.state[data-state=verify-code]'));
@@ -329,7 +329,7 @@ $('[data-login-ds-id]').each(function() {
         })
         .catch(function() {
           // EMAIL NOT FOUND ON DATA SOURCE
-          _this.removeClass('disabled');
+          _this.removeClass('loading');
           _this.find('.btn-label').removeClass('hidden');
           _this.find('.loader').removeClass('show');
           $(containerSelector).find('.reset-email-error').html('We couldn\'t find your email in our system. Please try again.').removeClass('hidden');
