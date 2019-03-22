@@ -488,7 +488,7 @@ $('[data-login-ds-id]').each(function() {
             return dataSource.query(options)
               .then(function onPasswordUpdateSuccess(affected) {
                 if (!affected || !affected.length) {
-                  return Promise.reject('Your account has not been found for the given email.');
+                  return Promise.reject('Account not found for: ' + resetEmail);
                 }
 
                 _this.removeClass('loading');
