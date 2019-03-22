@@ -481,10 +481,16 @@ $('[data-login-ds-id]').each(function() {
               dataSourceEntryId: dataSourceEntry.id,
               data: {}
             };
-            options.where[data.emailColumn] = resetEmail;
+
+            options.where[data.emailColumn] = { $iLike: resetEmail };
             options.data[data.passColumn] = newPassword;
+
             return dataSource.query(options)
-              .then(function onPasswordUpdateSuccess() {
+              .then(function onPasswordUpdateSuccess(affected) {
+                if (!affected || !affected.length) {
+                  return Promise.reject('Your account has not been found for the given email.');
+                }
+
                 _this.removeClass('loading');
                 _this.find('.btn-label').removeClass('hidden');
                 _this.find('.loader').removeClass('show');
@@ -499,7 +505,7 @@ $('[data-login-ds-id]').each(function() {
                 _this.find('.btn-label').removeClass('hidden');
                 _this.find('.loader').removeClass('show');
 
-                $(containerSelector).find('.reset-password-error').html('Something went wrong! Try again.');
+                $(containerSelector).find('.reset-password-error').html(Fliplet.parseError(error) || 'Something went wrong! Try again.');
                 $(containerSelector).find('.reset-password-error').removeClass('hidden');
               });
           });
