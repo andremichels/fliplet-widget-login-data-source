@@ -130,6 +130,12 @@ function save(notifyComplete) {
     };
     definition.validation = validation;
 
+    // Update definition to make sure the password never gets sent to apps
+    // when fetching data for this dataSource
+    if (!Array.isArray(definition.exclude) && data.passColumn) {
+      definition.exclude = [data.passColumn];
+    }
+
     // Update data source definitions
     var options = { id: data.dataSource, definition: definition };
     updateDataSource = Fliplet.DataSources.update(options);
