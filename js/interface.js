@@ -130,10 +130,14 @@ function save(notifyComplete) {
     };
     definition.validation = validation;
 
-    // Update definition to make sure the password never gets sent to apps
-    // when fetching data for this dataSource
-    if (!Array.isArray(definition.exclude) && data.passColumn) {
-      definition.exclude = [data.passColumn];
+    // Update definition to make sure the password never gets sent
+    // to apps when fetching data for this dataSource.
+    if (data.passColumn) {
+      if (!Array.isArray(definition.exclude)) {
+        definition.exclude = [];
+      }
+
+      definition.exclude = _.compact(definition.exclude.concat([data.passColumn]));
     }
 
     // Update data source definitions
