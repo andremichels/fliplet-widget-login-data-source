@@ -137,7 +137,7 @@ function save(notifyComplete) {
         definition.exclude = [];
       }
 
-      definition.exclude = _.compact(definition.exclude.concat([data.passColumn]));
+      definition.exclude = _.compact(_.uniq(definition.exclude.concat([data.passColumn])));
     }
 
     // Update data source definitions
