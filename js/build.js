@@ -197,14 +197,15 @@ $('[data-login-ds-id]').each(function() {
               'email': profileEmail,
               'user': user
             }),
-            Fliplet.Security.Storage.update(),
-            Fliplet.Hooks.run('login', {
+            Fliplet.Security.Storage.update()
+          ]).then(function () {
+            return Fliplet.Hooks.run('login', {
               passport: 'dataSource',
               session: authorization.session,
               entry: entry,
               userProfile: user
-            })
-          ])
+            });
+          });
         })
         .then(function() {
           _this.removeClass('loading');
@@ -393,12 +394,15 @@ $('[data-login-ds-id]').each(function() {
                 .then(function(entry) {
                   dataSourceEntry = entry;
                   return Promise.all([
-                    Fliplet.App.Storage.set('fl-chat-source-id', entry.dataSourceId),
-                    Fliplet.App.Storage.set('fl-chat-auth-email', resetEmail),
-                    Fliplet.App.Storage.set('fl-email-verification', entry),
-                    Fliplet.Profile.set('email', resetEmail),
-                    Fliplet.Hooks.run('onUserVerified', { entry: entry })
-                  ]);
+                    Fliplet.App.Storage.set({
+                      'fl-chat-source-id': entry.dataSourceId,
+                      'fl-chat-auth-email': resetEmail,
+                      'fl-email-verification': entry
+                    }),
+                    Fliplet.Profile.set('email', resetEmail)
+                  ]).then(function () {
+                    return Fliplet.Hooks.run('onUserVerified', { entry: entry });
+                  });
                 })
                 .then(function() {
                   if ($(containerSelector).find('.state[data-state=verify-code] .form-group').hasClass('has-error')) {
