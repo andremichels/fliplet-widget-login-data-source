@@ -6,6 +6,7 @@ var validInputEventName = 'interface-validate';
 
 var $dataSource = $('#dataSource');
 var allDataSources;
+var currentDataSource;
 var initialLoadingDone = false;
 
 var templates = {
