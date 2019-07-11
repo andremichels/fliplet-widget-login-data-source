@@ -106,7 +106,7 @@ function template(name) {
 
 function save(notifyComplete) {
   // Get and save values to data
-  fields.forEach(function (fieldId) {
+  _.forEach(fields, function (fieldId) {
     data[fieldId] = $('#' + fieldId).val();
   });
 
@@ -164,7 +164,7 @@ Fliplet.Widget.emit(validInputEventName, {
 Fliplet.DataSources.get({ organizationId: organizationId, appId: Fliplet.Env.get('appId') }).then(function (dataSources) {
   allDataSources = dataSources || [];
   $dataSource.html('<option value="">-- Select a data source</option><option disabled>------</option><option value="new">Create a new data source</option><option disabled>------</option>');
-  dataSources.forEach(renderDataSource);
+  _.forEach(dataSources, renderDataSource);
   return Promise.resolve();
 }).then(initializeData);
 
@@ -172,7 +172,7 @@ function reloadDataSource(dataSourceId) {
   Fliplet.DataSources.get({ organizationId: organizationId, appId: Fliplet.Env.get('appId') }, {cache: false}).then(function (dataSources) {
     allDataSources = dataSources || [];
     $dataSource.html('<option value="">-- Select a data source</option><option disabled>------</option><option value="new">Create a new data source</option><option disabled>------</option>');
-    dataSources.forEach(renderDataSource);
+    _.forEach(dataSources, renderDataSource);
     return Promise.resolve();
   }).then(function() {
     $dataSource.val(dataSourceId);
@@ -266,10 +266,10 @@ $dataSource.on('change', function onDataSourceListChange() {
     $('#select-pass-field').addClass('hidden');
   }
 
-  allDataSources.forEach(function(dataSource){
+  _.forEach(allDataSources, function(dataSource){
     if(dataSource.id == selectedValue && typeof dataSource.columns !== "undefined") {
       currentDataSource = dataSource;
-      dataSource.columns.forEach(renderDataSourceColumn);
+      _.forEach(dataSource.columns, renderDataSourceColumn);
       $('#emailColumn').val(tempColumnValues.emailColumn).trigger('change');
       $('#passColumn').val(tempColumnValues.passColumn).trigger('change');
     }
@@ -309,7 +309,7 @@ $('#help_tip').on('click', function() {
 });
 
 function initializeData() {
-  fields.forEach(function (fieldId) {
+  _.forEach(fields, function (fieldId) {
     if (data[fieldId]) {
       $('#' + fieldId).val(data[fieldId]).change();
     }
