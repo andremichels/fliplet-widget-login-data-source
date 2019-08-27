@@ -271,8 +271,12 @@ $dataSource.on('change', function onDataSourceListChange() {
     if(dataSource.id == selectedValue && typeof dataSource.columns !== "undefined") {
       currentDataSource = dataSource;
       _.forEach(dataSource.columns, renderDataSourceColumn);
-      $('#emailColumn').val(tempColumnValues.emailColumn).trigger('change');
-      $('#passColumn').val(tempColumnValues.passColumn).trigger('change');
+
+      var emainColumnValue = dataSource.columns.indexOf(tempColumnValues.emailColumn) !== -1 ? tempColumnValues.emailColumn : 'none';
+      var passColumnValue = dataSource.columns.indexOf(tempColumnValues.passColumn) !== -1 ? tempColumnValues.passColumn : 'none';
+
+      $('#emailColumn').val(emainColumnValue).trigger('change');
+      $('#passColumn').val(passColumnValue).trigger('change');
     }
   });
 });
