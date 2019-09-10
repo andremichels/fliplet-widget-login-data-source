@@ -309,10 +309,6 @@ $('#allow_reset').on('change', function() {
   initialLoadingDone = true;
 });
 
-$('#help_tip').on('click', function() {
-  alert("During beta, please use live chat and let us know what you need help with.");
-});
-
 function initializeData() {
   _.forEach(fields, function (fieldId) {
     if (data[fieldId]) {
