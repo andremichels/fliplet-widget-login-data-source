@@ -218,7 +218,7 @@ $('[data-login-ds-id]').each(function() {
               duration: false,
               tapToDismiss: false,
               title: 'Login successful',
-              message: 'To test security features in Fliplet Studio, go to "Change preview settings > Enable security" in the preview options on the right to enable security.',
+              message: 'To test security features in Fliplet Studio, go to "Preview > Change preview settings > Enable security" to enable security.',
               actions: [
                 {
                   label: 'OK',
