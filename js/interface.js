@@ -3,6 +3,8 @@ var widgetId = Fliplet.Widget.getDefaultId();
 var data = Fliplet.Widget.getData(widgetId) || {};
 var organizationId = Fliplet.Env.get('organizationId');
 var validInputEventName = 'interface-validate';
+var page = Fliplet.Widget.getPage();
+var omitPages = page ? [page.id] : [];
 
 var $dataSource = $('#dataSource');
 var allDataSources;
@@ -25,6 +27,7 @@ var fields = [
 var linkData = $.extend(true, {
   action: 'screen',
   page: '',
+  omitPages: omitPages,
   transition: 'fade',
   options: {
     hideAction: true
