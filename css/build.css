@@ -267,6 +267,11 @@ input.form-control {
     max-width: 100%;
   }
 
+  .btn-primary .update-password {
+    min-width: 30%;
+    width: auto;
+  }
+
   .btn-secondary {
     clear: none;
     display: inline-block;
