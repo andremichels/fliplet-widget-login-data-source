@@ -267,11 +267,6 @@ input.form-control {
     max-width: 100%;
   }
 
-  .btn-primary .update-password {
-    min-width: 30%;
-    width: auto;
-  }
-
   .btn-secondary {
     clear: none;
     display: inline-block;
@@ -286,5 +281,12 @@ input.form-control {
     width: 30%;
     margin: 0 auto;
     max-width: 100%;
+  }
+
+  [data-widget-package="com.fliplet.login-data-source"] .btn.btn-primary,
+  [data-widget-package="com.fliplet.login-data-source"] .btn.btn-secondary,
+  [data-widget-package="com.fliplet.login-data-source"] .btn.btn-danger {
+    min-width: 30% !important;
+    width: auto !important;
   }
 }
