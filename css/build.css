@@ -259,26 +259,12 @@ input.form-control {
     padding: 0 12.5%;
   }
 
-  .btn-primary {
+  [data-widget-package="com.fliplet.login-data-source"] .btn.btn-primary,
+  [data-widget-package="com.fliplet.login-data-source"] .btn.btn-secondary,
+  [data-widget-package="com.fliplet.login-data-source"] .btn.btn-danger {
     clear: none;
     display: inline-block;
-    width: 30%;
-    margin: 0 auto;
-    max-width: 100%;
-  }
-
-  .btn-secondary {
-    clear: none;
-    display: inline-block;
-    width: 30%;
-    margin: 0 auto;
-    max-width: 100%;
-  }
-
-  .btn-danger {
-    clear: none;
-    display: inline-block;
-    width: 30%;
+    min-width: 30%;
     margin: 0 auto;
     max-width: 100%;
   }
