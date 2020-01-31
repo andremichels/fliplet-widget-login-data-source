@@ -195,26 +195,34 @@ function renderDataSourceColumn(dataSourceColumn){
 
 function createDataSource() {
   event.preventDefault();
-  var name = prompt('Please type a name for your data source:');
 
-  if (name === null) {
-    $dataSource.val('').trigger('change');
-    return;
-  }
+  Fliplet.Modal.prompt({
+    title: 'Please enter a data source name'
+  }).then(function(result) {
+    if (result === null) {
+      $dataSource.val('').trigger('change');
+      return;
+    }
 
-  if (name === '') {
-    $dataSource.val('').trigger('change');
-    alert('You must enter a data source name');
-    return;
-  }
+    var dataSourceName = result.trim();
 
-  Fliplet.DataSources.create({
-    name: name,
-    organizationId: Fliplet.Env.get('organizationId')
-  }).then(function(ds) {
-    allDataSources.push(ds);
-    $dataSource.append('<option value="' + ds.id + '">' + ds.name + '</option>');
-    $dataSource.val(ds.id).trigger('change');
+    if (!dataSourceName) {
+      Fliplet.Modal.alert({
+        message: 'You must enter a data source name'
+      }).then(function() {
+        createDataSource();
+        return;
+      });
+    }
+
+    Fliplet.DataSources.create({
+      name: dataSourceName,
+      organizationId: Fliplet.Env.get('organizationId')
+    }).then(function(ds) {
+      allDataSources.push(ds);
+      $dataSource.append('<option value="' + ds.id + '">' + ds.name + '</option>');
+      $dataSource.val(ds.id).trigger('change');
+    });
   });
 }
 
