@@ -258,7 +258,7 @@ $('#manage-data a').on('click', manageAppData);
 $dataSource.on('change', function onDataSourceListChange() {
   var selectedOption = $(this).find('option:selected');
   var selectedText = selectedOption.text();
-  var selectedValue = selectedOption.val();
+  var selectedValue = parseInt(selectedOption.val(), 10);
 
   $(this).parents('.select-proxy-display').find('.select-value-proxy').html(selectedText);
   $('#emailColumn option:gt(0)').remove();
