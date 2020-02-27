@@ -249,7 +249,7 @@ function syncTempColumns(columnType) {
 
 Fliplet.Studio.onMessage(function(event) {
   if (event.data && event.data.event === 'overlay-close') {
-    reloadDataSource(event.data.data.dataSourceId);
+    reloadDataSource(event.data.data.dataSourceId || currentDataSource.id);
   }
 });
 
