@@ -10,6 +10,7 @@ var $dataSource = $('#dataSource');
 var allDataSources;
 var currentDataSource;
 var initialLoadingDone = false;
+var defaultExpireTimeout = 2880;
 
 var templates = {
   dataSourceEntry: template('data-source-entry')
@@ -20,7 +21,8 @@ var defaultEmailTemplate = $('#email-template-default').html();
 var fields = [
   'dataSource',
   'emailColumn',
-  'passColumn'
+  'passColumn',
+  'expireTimeout'
 ];
 
 var linkData = $.extend(true, {
@@ -108,9 +110,47 @@ function template(name) {
   return Handlebars.compile($('#template-' + name).html());
 }
 
+// Converts minutes to hours or days or weeks
+function setReadableExpirePeriod(value) {
+  var timeInterval = '1';
+
+  if (value % 60 === 0 && value > 0) {
+    // Converts to hours
+    value = value / 60;
+    timeInterval = '60';
+
+    if (value % 24 === 0) {
+      // Converts to days
+      value = value / 24;
+      timeInterval = '1440';
+
+      if (value % 7 === 0) {
+        // Converts to weeks
+        value = value / 7;
+        timeInterval = '10080';
+      }
+    }
+  }
+
+  $('#expire-timeout').val(value);
+  $('#time-value').val(timeInterval);
+}
+
+// Converts time to minutes depending on selected hours or days or weeks
+function convertTimeToMinutes () {
+  var inputValue = $('#expire-timeout').val();
+  var selectValue = $('#time-value').val();
+  return inputValue * selectValue;
+}
+
 function save(notifyComplete) {
   // Get and save values to data
   _.forEach(fields, function(fieldId) {
+    if (fieldId === 'expireTimeout') {
+      data[fieldId] = $('#expire-timeout').val() ? convertTimeToMinutes() : defaultExpireTimeout;
+      return;
+    }
+
     data[fieldId] = $('#' + fieldId).val();
   });
 
@@ -121,7 +161,7 @@ function save(notifyComplete) {
     var validation = {
       email: {
         domain: false,
-        expire: '60',
+        expire: convertTimeToMinutes(),
         domains: [],
         template: {
           to: [],
@@ -305,13 +345,11 @@ $('#emailColumn, #passColumn').on('change', function() {
 });
 
 $('#allow_reset').on('change', function() {
-  if ($(this).prop('checked')) {
-    $('.reset-pass-redirect').removeClass('hidden');
-    data.allowReset = true;
-  } else {
-    $('.reset-pass-redirect').addClass('hidden');
-    data.allowReset = false;
-  }
+  var checked = $(this).prop('checked');
+
+  $('.reset-pass-redirect').toggleClass('hidden', !checked);
+  $('.expire-timeout-settings').toggleClass('hidden', !checked);
+  data.allowReset = checked;
 
   if (initialLoadingDone) {
     save();
@@ -322,7 +360,9 @@ $('#allow_reset').on('change', function() {
 
 function initializeData() {
   _.forEach(fields, function(fieldId) {
-    if (data[fieldId]) {
+    if (fieldId === 'expireTimeout') {
+      setReadableExpirePeriod(data[fieldId] || defaultExpireTimeout);
+    } else if (data[fieldId]) {
       $('#' + fieldId).val(data[fieldId]).change();
     }
   });
@@ -331,3 +371,8 @@ function initializeData() {
     $('#allow_reset').trigger('change');
   }
 }
+
+// Preveting entering invalid values in the expiration input
+$('#expire-timeout').on('keydown', function(event) {
+  return event.keyCode === 8 || /[0-9]+/.test(event.key);
+});
