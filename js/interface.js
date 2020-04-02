@@ -255,6 +255,10 @@ function createDataSource() {
       });
     }
 
+    $('#manage-data').removeClass('hidden');
+    $('#select-email-field').removeClass('hidden');
+    $('#select-pass-field').removeClass('hidden');
+
     Fliplet.DataSources.create({
       name: dataSourceName,
       organizationId: Fliplet.Env.get('organizationId')
@@ -299,24 +303,21 @@ $dataSource.on('change', function onDataSourceListChange() {
   var selectedOption = $(this).find('option:selected');
   var selectedText = selectedOption.text();
   var selectedValue = parseInt(selectedOption.val(), 10);
+  var optionValue =  $(this).val();
 
   $(this).parents('.select-proxy-display').find('.select-value-proxy').html(selectedText);
   $('#emailColumn option:gt(0)').remove();
   $('#passColumn option:gt(0)').remove();
 
-  if ( $(this).val() === 'new' ) {
+  if (optionValue === 'new') {
     createDataSource();
   }
 
-  if ( $(this).val() !== 'none' ) {
-    $('#manage-data').removeClass('hidden');
-    $('#select-email-field').removeClass('hidden');
-    $('#select-pass-field').removeClass('hidden');
-  } else {
-    $('#manage-data').addClass('hidden');
-    $('#select-email-field').addClass('hidden');
-    $('#select-pass-field').addClass('hidden');
-  }
+  var dsSelected =  !optionValue || optionValue === 'none' || optionValue === 'new';
+
+  $('#manage-data').toggleClass('hidden', dsSelected);
+  $('#select-email-field').toggleClass('hidden', dsSelected);
+  $('#select-pass-field').toggleClass('hidden', dsSelected);
 
   _.forEach(allDataSources, function(dataSource) {
     if (dataSource.id === selectedValue && typeof dataSource.columns !== 'undefined') {
