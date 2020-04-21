@@ -139,7 +139,7 @@ Fliplet.Widget.instance('login-ds', function(data) {
     $container.on('submit', '.fl-login-form form', function(e) {
       e.preventDefault();
       var _this = $(this);
-      _this.parents('.form-btns').find('.login-error').addClass('hidden');
+      _this.find('.login-error').addClass('hidden');
 
       var profileEmail = $container.find('input.profile_email').val().toLowerCase();
       var profilePassword = $container.find('input.profile_password').val();
@@ -157,7 +157,7 @@ Fliplet.Widget.instance('login-ds', function(data) {
         _this.find('.btn-label').removeClass('hidden');
         _this.find('.loader').removeClass('show');
         // Show error
-        _this.parents('.form-btns').find('.login-error').html('Please enter a valid email.').removeClass('hidden');
+        _this.find('.login-error').html('Please enter a valid email.').removeClass('hidden');
         return;
       }
 
@@ -242,7 +242,7 @@ Fliplet.Widget.instance('login-ds', function(data) {
           _this.removeClass('loading');
           _this.find('.btn-label').removeClass('hidden');
           _this.find('.loader').removeClass('show');
-          _this.parents('.form-btns').find('.login-error').html('Your email or password don\'t match. Please try again.').removeClass('hidden');
+          _this.find('.login-error').html('Your email or password don\'t match. Please try again.').removeClass('hidden');
           Fliplet.UI.Toast.error(error, {
             message: 'Login error'
           });
