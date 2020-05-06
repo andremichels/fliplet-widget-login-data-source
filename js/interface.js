@@ -320,7 +320,7 @@ $dataSource.on('change', function onDataSourceListChange() {
   $('#select-pass-field').toggleClass('hidden', dsSelected);
 
   _.forEach(allDataSources, function(dataSource) {
-    if (dataSource.id === selectedValue && typeof dataSource.columns !== 'undefined') {
+    if (dataSource.id === selectedValue && dataSource.columns) {
       currentDataSource = dataSource;
       _.forEach(dataSource.columns, renderDataSourceColumn);
 
