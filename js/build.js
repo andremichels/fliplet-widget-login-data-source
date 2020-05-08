@@ -242,7 +242,7 @@ Fliplet.Widget.instance('login-ds', function(data) {
           _this.removeClass('loading');
           _this.find('.btn-label').removeClass('hidden');
           _this.find('.loader').removeClass('show');
-          _this.find('.login-error').html('Your email or password don\'t match. Please try again.').removeClass('hidden');
+          _this.find('.login-error').html(Fliplet.parseError(error)).removeClass('hidden');
           Fliplet.UI.Toast.error(error, {
             message: 'Login error'
           });
