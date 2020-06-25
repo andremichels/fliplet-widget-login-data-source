@@ -53,6 +53,10 @@ h2 small {
   padding-top: 15px;
 }
 
+.alert-warning u {
+  cursor: pointer;
+}
+
 select.custom-chevron {
   -webkit-appearance: none;
   -moz-appearance: none;

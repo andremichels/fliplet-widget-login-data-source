@@ -2,6 +2,7 @@
 var widgetId = Fliplet.Widget.getDefaultId();
 var data = Fliplet.Widget.getData(widgetId) || {};
 var organizationId = Fliplet.Env.get('organizationId');
+var appId = Fliplet.Env.get('appId');
 var validInputEventName = 'interface-validate';
 var page = Fliplet.Widget.getPage();
 var omitPages = page ? [page.id] : [];
@@ -143,6 +144,25 @@ function convertTimeToMinutes () {
   return inputValue * selectValue;
 }
 
+// Shows warning if security setting are not configured correctly
+function checkSecurityRules () {
+  Fliplet.API.request('v1/apps/' + appId).then(function(result) {
+    if (!result || !result.app) {
+      return;
+    }
+    
+    var isSecurityConfigured = _.some(result.app.hooks, function(hook) {
+      return hook.script.indexOf(page.id) !== -1;
+    });
+    
+    if (!result.app.hooks.length) {
+      $('#security-alert span').text('app has no security rules configured to prevent unauthorized access.');
+    }
+
+    $('#security-alert').toggleClass('hidden', isSecurityConfigured);
+  })
+}
+
 function save(notifyComplete) {
   // Get and save values to data
   _.forEach(fields, function(fieldId) {
@@ -205,7 +225,7 @@ Fliplet.Widget.emit(validInputEventName, {
   isValid: false
 });
 
-Fliplet.DataSources.get({ organizationId: organizationId, appId: Fliplet.Env.get('appId') }).then(function(dataSources) {
+Fliplet.DataSources.get({ organizationId: organizationId, appId: appId }).then(function(dataSources) {
   allDataSources = dataSources || [];
   $dataSource.html('<option value="">-- Select a data source</option><option disabled>------</option><option value="new">Create a new data source</option><option disabled>------</option>');
   _.forEach(dataSources, renderDataSource);
@@ -213,7 +233,7 @@ Fliplet.DataSources.get({ organizationId: organizationId, appId: Fliplet.Env.get
 }).then(initializeData);
 
 function reloadDataSource(dataSourceId) {
-  Fliplet.DataSources.get({ organizationId: organizationId, appId: Fliplet.Env.get('appId') }, {cache: false}).then(function(dataSources) {
+  Fliplet.DataSources.get({ organizationId: organizationId, appId: appId }, {cache: false}).then(function(dataSources) {
     allDataSources = dataSources || [];
     $dataSource.html('<option value="">-- Select a data source</option><option disabled>------</option><option value="new">Create a new data source</option><option disabled>------</option>');
     _.forEach(dataSources, renderDataSource);
@@ -359,7 +379,22 @@ $('#allow_reset').on('change', function() {
   initialLoadingDone = true;
 });
 
+// Open security overlay
+$('#security-alert u').on('click', function() {
+  Fliplet.Studio.emit('overlay', {
+    name: 'app-settings',
+    options: {
+      title: 'App Settings',
+      size: 'large',
+      section: 'appSecurity',
+      appId: appId
+    }
+  });
+});
+
 function initializeData() {
+  checkSecurityRules();
+
   _.forEach(fields, function(fieldId) {
     if (fieldId === 'expireTimeout') {
       setReadableExpirePeriod(data[fieldId] || defaultExpireTimeout);
