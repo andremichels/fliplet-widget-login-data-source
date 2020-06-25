@@ -150,12 +150,13 @@ function checkSecurityRules () {
     if (!result || !result.app) {
       return;
     }
-    
-    var isSecurityConfigured = _.some(result.app.hooks, function(hook) {
+
+    var hooks = _.get(result.app, 'hooks', []);
+    var isSecurityConfigured = _.some(hooks, function(hook) {
       return hook.script.indexOf(page.id) !== -1;
     });
     
-    if (!result.app.hooks.length) {
+    if (!hooks.length) {
       $('#security-alert span').text('app has no security rules configured to prevent unauthorized access.');
     }
 
