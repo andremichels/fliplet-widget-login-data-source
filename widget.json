@@ -1,6 +1,6 @@
 {
-  "name": "Login",
-  "package": "com.fliplet.login-data-source",
+  "name": "Login - Portuguese",
+  "package": "br.com.fliplet.login-data-source",
   "version": "2.0.0",
   "icon": "img/icon.png",
   "tags": ["type:component", "category:security"],
